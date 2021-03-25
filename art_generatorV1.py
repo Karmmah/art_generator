@@ -25,17 +25,13 @@ def give_color():
 
 def give_random_color():
     color = [0]*6
-    
     for i in range(len(color)):
         value = random.sample(range(16), 1)[0]
-        
         if hex(value).lstrip('0x') == '':
             color[i] = '0'
         else:
             color[i] = hex(value).lstrip('0x')
-
     string = '#'+str(color[0])+str(color[1])+str(color[2])+str(color[3])+str(color[4])+str(color[5])
-    
     return string
 
 def save_imageinfo(event):
