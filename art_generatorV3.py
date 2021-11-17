@@ -491,19 +491,19 @@ def draw_colorwall(event):
 
 def draw_pattern(event):
     border = int(e_border.get())
-##    if bgtype == 0:
-##        draw_gradient('')
-####    elif bgtype == 1:
-####        draw_colorwall('')
-##    else:
-##        draw_color('')
+    bgtype = rn.randint(1,2)
+    if bgtype == 0:
+        draw_gradient('')
+    elif bgtype == 1:
+        draw_patch('')
+    else:
+        draw_color('')
     pattern_amount_x = rn.randint(6,25) #how many pattern elements are drawn per line
     pattern_amount_y = int(round(pattern_amount_x*(canvas_height/canvas_width),0))
     pattern_width = (canvas_width-2*border)/pattern_amount_x #pixel size of each tile
     line_width = 195/pattern_amount_x #line_width = 95/pattern_amount_x*rn.randint(90,110)*0.01
     color = get_color()
     pattern_nr = rn.randint(0,6) #which pattern to draw
-    draw_color('') #bgtype = rn.randint(0,1)
     if pattern_nr == 0: #slash pattern
         for i in range(pattern_amount_y):
             for j in range(pattern_amount_x):
@@ -841,9 +841,9 @@ b_threedee = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_t
 b_rgb = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_rgb(''), text='RGB', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
 b_colorline = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_colorline(''), text='colorline', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=3,column=0)
 b_colorpolygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_colorpolygon(''), text='colorpolygon', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=3,column=1)
-b_radial = tk.Button(f_buttons_top, state='normal', command=lambda:draw_radial(''), text='radial', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
-b_symmetry = tk.Button(f_buttons_top, state='normal', command=lambda:draw_symmetry(''), text='symmetry', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=1)
-b_mandala = tk.Button(f_buttons_top, state='normal', command=lambda:draw_mandala(''), text='mandala', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=5,column=0)
+b_radial = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_radial(''), text='radial', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
+b_symmetry = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_symmetry(''), text='symmetry', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=1)
+b_mandala = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_mandala(''), text='mandala', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=5,column=0)
 
 b_line = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_line('', '', ''), text='line', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_arc = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_arc(''), text='arc', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
