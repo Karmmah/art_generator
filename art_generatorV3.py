@@ -21,16 +21,14 @@ global svg
 svg = default_background
 
 def draw_image(event): #draw random amount of shapes with background
-	bg = rn.randint(1,5)
+	bg = rn.randint(1,4)
 	if bg == 0: #background
-		pass #draw_gradient
+		pass #draw_gradient()
 	elif bg == 1:
-		draw_paper('')
-	elif bg == 2:
 		draw_colorwall('')
-	elif bg == 3:
+	elif bg == 2:
 		draw_perspective('')
-	elif bg == 4:
+	elif bg == 3:
 		draw_patch('')
 	else:
 		draw_color('')
@@ -411,7 +409,7 @@ def draw_triangle(event):
 def draw_spectrum(event):
     points = rn.randint(4,8)
     number_of_lines = rn.randint(points*2,points*3)*1
-    divisions = 24+rn.randint(-4,4)#12+rn.randint(-2,2) #number of points in each line
+    divisions = 18+rn.randint(-4,4)#12+rn.randint(-2,2) #number of points in each line
     height_variety = int(round(200/number_of_lines,0))
     width = 100/number_of_lines+rn.randint(int(-50/number_of_lines),int(50/number_of_lines)) #line width
     draw_color('') #background
@@ -727,7 +725,8 @@ def draw_voronoi(event): #NOT FINISHED
 
 def draw_perspective(event):
 	draw_color('')
-	point = [rn.randint(0,canvas_width), rn.randint(0,canvas_height)]
+	ybuffer = int(canvas_height*0.2)
+	point = [rn.randint(0,canvas_width), rn.randint(0+ybuffer,canvas_height)-ybuffer]
 	if rn.randint(0,1) == 1: #option to draw walls in different color
 		wall_color = get_color()
 		coords = [0,0,point[0],point[1],0,canvas_height] #wall left
