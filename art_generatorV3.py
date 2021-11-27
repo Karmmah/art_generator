@@ -5,6 +5,10 @@
 #swirls
 #angled rectangles
 #circular gradient
+#auswahlbox für art des kunstwerks (pattern, symmetry, mandala, comic, ...)
+
+#anmerkung für nächste version:
+#-parameter als array übergeben und über länge herausfinden welche übergeben wurden
 
 #https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Basic_Shapes
 
@@ -42,7 +46,7 @@ def draw_image(event): #draw random amount of shapes with background
 		elif shape == 2:
 			draw_polyline('','', '')
 		elif shape == 3:
-			draw_ellipse('','')
+			draw_ellipse('','','')
 		elif shape == 4:
 			draw_polygon('','','')
 		elif shape == 5:
@@ -92,41 +96,38 @@ def get_color():
     if baldessari_mode.get() == 1:
         #baldessari_colors = ['red', 'yellow', 'limegreen', 'dodgerblue']
         colors = ['#ff0000', '#ffff00', '#32cd32', '#1e90ff']
-        return colors[rn.randint(0,len(colors)-1)]
+        color = colors[rn.randint(0,len(colors)-1)]
     elif base_mode.get() == 1:
         #base_colors = ['red','yellow','lime','blue']
         colors = ['#ff0000', '#ffff00', '#00ff00', '#0000ff']
-        return colors[rn.randint(0,len(colors)-1)]
+        color = colors[rn.randint(0,len(colors)-1)]
     elif piet_mode.get() == 1:
         colors = ['#FFFFFF', '#000000', '#FFC0C0', '#FFFFC0', '#C0FFC0', '#C0FFFF', '#C0C0FF', '#FFC0FF', '#FF0000', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#FF00FF', '#C00000', '#C0C000', '#00C000', '#00C0C0', '#0000C0', '#C000C0']
-        return colors[rn.randint(0,len(colors)-1)]
+        color = colors[rn.randint(0,len(colors)-1)]
     elif grayscale_mode.get() == 1:
         gray = rn.randint(0,255)
         color = str(hex(gray).lstrip('0x'))+str(hex(gray).lstrip('0x'))+str(hex(gray).lstrip('0x'))
-        return '#'+color
     else: #random color
         color = hex(rn.randint(0,16777215)).lstrip('0x')
         if len(color) < 6:
             color = 'ffffff' if rn.randint(0,1) == 0 else '000000'
-        color = '#'+color
-        return color
+    return '#'+color
 
 def get_gradient(color1,color2,steps):
     red1, green1, blue1 = int(color1[1:3],16), int(color1[3:5],16), int(color1[5:7],16)
     red2, green2, blue2 = int(color2[1:3],16), int(color2[3:5],16), int(color2[5:7],16)
     gradient = []
     for i in range(steps):
-        red_new = hex(int(round(red1+(red2-red1)*i/steps,0))).lstrip('0x')
-        green_new = hex(int(round(green1+(green2-green1)*i/steps,0))).lstrip('0x')
-        blue_new = hex(int(round(blue1+(blue2-blue1)*i/steps,0))).lstrip('0x')
-        if len(red_new) < 2:
+        red_new = hex(int(round(red1+(red2-red1)*i/steps,0))).lstrip('-0x')
+        green_new = hex(int(round(green1+(green2-green1)*i/steps,0))).lstrip('-0x')
+        blue_new = hex(int(round(blue1+(blue2-blue1)*i/steps,0))).lstrip('-0x')
+        while len(red_new) < 2:
             red_new = '0'+red_new
-        if len(green_new) < 2:
+        while len(green_new) < 2:
             green_new = '0'+green_new
-        if len(blue_new) < 2:
+        while len(blue_new) < 2:
             blue_new = '0'+blue_new
-        color_new = '#'+str(red_new)+str(green_new)+str(blue_new)
-        gradient.append(color_new)
+        gradient.append('#'+str(red_new)+str(green_new)+str(blue_new))
     return gradient
 
 def is_color(_input_):
@@ -164,6 +165,20 @@ def draw_color(color): #draw full screen of one color as background
     output = '\n<rect x="0" y="0" width="'+str(canvas_width)+'" height="'+str(canvas_height)+'" fill="'+color+'" stroke="none"/>'
     collect_output(output, 'overwrite')
 
+def draw_gradient(color1,color2):
+	orientation = rn.randint(0,0)
+	test_mode = 1 #testing
+	if orientation == 0: #horizontal gradient
+		gradient = get_gradient(color1,color2,canvas_height)
+		for i in range(0,len(gradient),3):
+			coords = [0,i,canvas_width,i]
+			draw_line(coords,gradient[i],3)
+	else: #vertical gradient
+		gradient = get_gradient(color1,color2,canvas_width)
+	#save('') #testing
+	#at the end erase svg memory from all lines and insert one rectangle with gradient fill
+	#svg = '<defs>\n  <linearGradient\n    <stop offset=0/>\n  </linearGradient>\n</defs>'
+
 def draw_rectangle(coordinates, color, mode): #inputs can be left blank to get random values
     coordinates = coordinates if len(coordinates) == 4 else get_coordinates(2) #if no coordinates are given, get random ones
     x1, y1, x2, y2 = sort_coordinates(coordinates)
@@ -189,13 +204,19 @@ def draw_line(coordinates, color, width): #straight line with start and end poin
     output = '\n<line x1="'+str(coordinates[0])+'" y1="'+str(coordinates[1])+'" x2="'+str(coordinates[2])+'" y2="'+str(coordinates[3])+'" stroke="'+color+'" stroke-width="'+str(width)+'"  stroke-linecap="square"/>'
     collect_output(output,'')
 
-def draw_ellipse(coordinates, color):
+def draw_ellipse(coordinates, color, mode):
     coordinates = coordinates if len(coordinates) == 4 else get_coordinates(2) #if no coordinates are given, get random ones
     x1, y1, x2, y2 = sort_coordinates(coordinates)
     cx, cy = (x1+x2)*0.5, (y1+y2)*0.5  #for svg output
     rx, ry = (x2-x1)*0.5, (y2-y1)*0.5
     color = color if is_color(color) else get_color()
-    if rn.randint(0,1) == 0: #filled
+    if mode == 'filled':
+        __mode__ = 0
+    elif mode == 'outline':
+        __mode__ = 1
+    else:
+        __mode__ = rn.randint(0,1)
+    if __mode__ == 0: #filled
         canvas.create_oval(coordinates, fill=color, outline='')
         output = '\n<ellipse cx="'+str(cx)+'" cy="'+str(cy)+'" rx="'+str(rx)+'" ry="'+str(ry)+'" fill="'+color+'" stroke="none"/>'
     else: #outlined
@@ -772,6 +793,38 @@ def draw_patch(event): #background with three colors
 			coordinates = [rn.randint(0,canvas_width),canvas_height,0,rn.randint(0,canvas_height),0,canvas_height]
 		draw_polygon(coordinates,'','filled')
 
+def draw_bubbles(event):
+	draw_color('')
+	references = rn.randint(2,7)
+	amount = rn.randint(20,2000)
+	coordinates = get_coordinates(amount)
+	colors = []
+	for i in range(references):
+		colors.append(get_color())
+	for i in range(references,amount-1): #draw colored circles colored according to nearest reference
+		canvas_factor = 10*canvas_height*(1+amount/rn.randint(700,1300))/amount
+		size = int(0.5*rn.randint(int(canvas_factor*0.7),int(canvas_factor*1.3)))
+		x1,y1 = coordinates[2*i]-size, coordinates[2*i+1]-size
+		x2,y2 = coordinates[2*i]+size, coordinates[2*i+1]+size
+		coords = [x1,y1,x2,y2]
+		distances = []
+		for j in range(references): #calculate which reference is closest
+			xref,yref = coordinates[2*j], coordinates[2*j+1]
+			xpoint,ypoint = coordinates[2*i], coordinates[2*i+1]
+			dist = math.sqrt((xpoint-xref)**2+(ypoint-yref)**2)
+			distances.append(dist)
+		min = 0
+		for i in range(references): #get index of lowest distance to assign according color
+			if distances[i] < distances[min]:
+				min = i
+		draw_ellipse(coords,colors[min],'filled')
+	'''for i in range(references): #draw references on top of the other circles
+		size = int(canvas_height/90)
+		x1,y1 = coordinates[2*i]-size, coordinates[2*i+1]-size
+		x2,y2 = coordinates[2*i]+size, coordinates[2*i+1]+size
+		coords = [x1,y1,x2,y2]
+		draw_ellipse(coords,'#000000','filled')'''
+
 
 background = '#777777' #program background color
 bwidth = 14 #button width
@@ -820,7 +873,7 @@ b_blacknwhite = tk.Button(f_buttons_top, state='normal', command=lambda:draw_bla
 b_threecolors = tk.Button(f_buttons_top, state='normal', command=lambda:draw_threecolors(''), text='threecolors', width=bwidth, bg='blue', fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
 b_pixels = tk.Button(f_buttons_top, state='normal', command=lambda:draw_pixels(''), text='pixels', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
 b_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_color(''), text='color', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
-b_gradient = tk.Button(f_buttons_top, state='disabled', command=lambda:draw_gradient(''), text='gradient', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
+b_gradient = tk.Button(f_buttons_top, state='normal', command=lambda:draw_gradient(get_color(),get_color()), text='gradient', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
 b_perspective = tk.Button(f_buttons_top, state='normal', command=lambda:draw_perspective(''), text='perspective', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=3,column=0)
 b_monocolor = tk.Button(f_buttons_top, state='normal', command=lambda:draw_monocolor(''), text='monocolor', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=3,column=1)
 b_pattern = tk.Button(f_buttons_top, state='normal', command=lambda:draw_pattern(''), text='pattern', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
@@ -831,6 +884,7 @@ b_voronoi = tk.Button(f_buttons_top, state='normal', command=lambda:draw_voronoi
 b_text = tk.Button(f_buttons_top, state='disabled', command=lambda:draw_text(''), text='text', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=6,column=1)
 b_paper = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paper(''), text='paper', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=7,column=0)
 b_patch = tk.Button(f_buttons_top, state='normal', command=lambda:draw_patch(''), text='patch', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=7,column=1)
+b_bubbles = tk.Button(f_buttons_top, state='normal', command=lambda:draw_bubbles(''), text='bubbles', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=8,column=0)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
@@ -847,7 +901,7 @@ b_mandala = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_mand
 b_line = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_line('', '', ''), text='line', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_arc = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_arc(''), text='arc', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
 b_rectangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_rectangle('','',''), text='rectangle', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
-b_ellipse = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_ellipse('', ''), text='ellipse', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
+b_ellipse = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_ellipse('', '', ''), text='ellipse', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
 b_triangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_triangle(''), text='triangle', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
 b_diamond = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_diamond(''), text='diamond', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
 
