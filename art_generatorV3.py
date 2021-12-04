@@ -6,9 +6,11 @@
 #angled rectangles
 #circular gradient
 #auswahlbox für art des kunstwerks (pattern, symmetry, mandala, comic, ...)
+#custom color sets (farben eingeben die dann ausschließlich verwendet werden)
 
 #anmerkung für nächste version:
-#-parameter als array übergeben und über länge herausfinden welche übergeben wurden
+#-parameter als array übergeben statt einzeln
+#-bei jeder funktion erst seed generieren, daraus bild malen, seed abspeichern (evtl auf dem bild als text)
 
 #https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Basic_Shapes
 
@@ -25,7 +27,7 @@ global svg
 svg = default_background
 
 def draw_image(event): #draw random amount of shapes with background
-	bg = rn.randint(1,4)
+	bg = rn.randint(1,5)
 	if bg == 0: #background
 		pass #draw_gradient()
 	elif bg == 1:
@@ -34,6 +36,8 @@ def draw_image(event): #draw random amount of shapes with background
 		draw_perspective('')
 	elif bg == 3:
 		draw_patch('')
+	elif bg == 4:
+		draw_bubbles('')
 	else:
 		draw_color('')
 	amount = rn.randint(5,12)
@@ -90,28 +94,28 @@ def delete_canvas(event): #event is given when bound keyboard key is pressed
     collect_output(default_background, 'overwrite')
 
 def get_color():
-    #color_mode = 1
-    #https://matplotlib.org/stable/gallery/color/named_colors.html
-    #'gold' 'cyan' 'dodgerblue' 'royalblue' 'orange' 'deeppink' 'darkviolet'
-    if baldessari_mode.get() == 1:
-        #baldessari_colors = ['red', 'yellow', 'limegreen', 'dodgerblue']
-        colors = ['#ff0000', '#ffff00', '#32cd32', '#1e90ff']
-        color = colors[rn.randint(0,len(colors)-1)]
-    elif base_mode.get() == 1:
-        #base_colors = ['red','yellow','lime','blue']
-        colors = ['#ff0000', '#ffff00', '#00ff00', '#0000ff']
-        color = colors[rn.randint(0,len(colors)-1)]
-    elif piet_mode.get() == 1:
-        colors = ['#FFFFFF', '#000000', '#FFC0C0', '#FFFFC0', '#C0FFC0', '#C0FFFF', '#C0C0FF', '#FFC0FF', '#FF0000', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#FF00FF', '#C00000', '#C0C000', '#00C000', '#00C0C0', '#0000C0', '#C000C0']
-        color = colors[rn.randint(0,len(colors)-1)]
-    elif grayscale_mode.get() == 1:
-        gray = rn.randint(0,255)
-        color = str(hex(gray).lstrip('0x'))+str(hex(gray).lstrip('0x'))+str(hex(gray).lstrip('0x'))
-    else: #random color
-        color = hex(rn.randint(0,16777215)).lstrip('0x')
-        if len(color) < 6:
-            color = 'ffffff' if rn.randint(0,1) == 0 else '000000'
-    return '#'+color
+	#color_mode = 1
+	#https://matplotlib.org/stable/gallery/color/named_colors.html
+	#'gold' 'cyan' 'dodgerblue' 'royalblue' 'orange' 'deeppink' 'darkviolet'
+	if baldessari_mode.get() == 1:
+		#baldessari_colors = ['red', 'yellow', 'limegreen', 'dodgerblue']
+		colors = ['#ff0000', '#ffff00', '#32cd32', '#1e90ff']
+		color = colors[rn.randint(0,len(colors)-1)]
+	elif base_mode.get() == 1:
+		#base_colors = ['red','yellow','lime','blue']
+		colors = ['#ff0000', '#ffff00', '#00ff00', '#0000ff']
+		color = colors[rn.randint(0,len(colors)-1)]
+	elif piet_mode.get() == 1:
+		colors = ['#FFFFFF', '#000000', '#FFC0C0', '#FFFFC0', '#C0FFC0', '#C0FFFF', '#C0C0FF', '#FFC0FF', '#FF0000', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#FF00FF', '#C00000', '#C0C000', '#00C000', '#00C0C0', '#0000C0', '#C000C0']
+		color = colors[rn.randint(0,len(colors)-1)]
+	elif grayscale_mode.get() == 1:
+		gray = rn.randint(0,255)
+		color = '#'+str(hex(gray).lstrip('0x'))+str(hex(gray).lstrip('0x'))+str(hex(gray).lstrip('0x'))
+	else: #random color
+		color = '#'+hex(rn.randint(0,16777215)).lstrip('0x')
+	if len(color) < 7:
+		color = '#ffffff' if rn.randint(0,1) == 0 else '#000000'
+	return color
 
 def get_gradient(color1,color2,steps):
     red1, green1, blue1 = int(color1[1:3],16), int(color1[3:5],16), int(color1[5:7],16)
@@ -159,13 +163,18 @@ def sort_coordinates(coordinates): #used in rectangle and ellipse to get correct
     return x1,y1,x2,y2
 
 def draw_color(color): #draw full screen of one color as background
-    color = color if is_color(color) else get_color()
+    global prev_drawing
+    prev_drawing = get_svg()
     canvas.delete('all')
+    color = color if is_color(color) else get_color()
     canvas.create_rectangle(0,0,canvas_width,canvas_height, fill=color, outline='')
     output = '\n<rect x="0" y="0" width="'+str(canvas_width)+'" height="'+str(canvas_height)+'" fill="'+color+'" stroke="none"/>'
     collect_output(output, 'overwrite')
 
 def draw_gradient(color1,color2):
+	global prev_drawing
+	prev_drawing = get_svg()
+	canvas.delete('all')
 	orientation = rn.randint(0,0)
 	test_mode = 1 #testing
 	if orientation == 0: #horizontal gradient
@@ -248,13 +257,13 @@ def draw_polygon(coordinates, color, mode): #mode can also be number, to set out
     if mode == 'filled': #filled
         canvas.create_polygon(coordinates, fill=color, outline='', joinstyle='miter')
         output = output + '" fill="'+color+'" stroke="none" stroke-linecap="butt" stroke-linejoin="miter"/>'
-    else:
+    else: #outline
         try:
             stroke_width = int(mode) #check if a number is given
         except: #else set random width
-            stroke_width = round(rn.randint(6,22))
+            stroke_width = round(rn.randint(10,30))
         canvas.create_polygon(coordinates, fill='', outline=color, width=stroke_width, joinstyle='miter')
-        output = output + '" fill="none" stroke="'+color+'" stroke-width="'+str(stroke_width)+'" stroke-linecap="butt" stroke-linejoin="miter"/>'
+        output = output + '" fill="none" stroke="'+color+'" stroke-width="'+str(stroke_width)+'" stroke-linecap="butt" stroke-linejoin="miter stroke-miterlimit:12"/>'
     collect_output(output,'')
 
 def draw_comic(event): #polygon with shadow
@@ -746,7 +755,7 @@ def draw_voronoi(event): #NOT FINISHED
 
 def draw_perspective(event):
 	draw_color('')
-	ybuffer = int(canvas_height*0.2)
+	ybuffer = int(canvas_height*0.2) #so the focal point is not on the edge of the image
 	point = [rn.randint(0,canvas_width), rn.randint(0+ybuffer,canvas_height)-ybuffer]
 	if rn.randint(0,1) == 1: #option to draw walls in different color
 		wall_color = get_color()
@@ -825,14 +834,51 @@ def draw_bubbles(event):
 		coords = [x1,y1,x2,y2]
 		draw_ellipse(coords,'#000000','filled')'''
 
+def draw_streaks(event):
+	draw_color('')
+	border = int(e_border.get())
+	amount = rn.randint(7,42)
+	line_color = get_color()
+	width = canvas_height/(amount*2.5)
+	step = (canvas_height-2*border)/amount
+	'''
+	for i in range(amount):
+		coords = [border+rn.randint(0,step*amount),border+i*step,canvas_height-border-rn.randint(0,step*amount),border+i*step]
+		draw_line(coords,line_color,width)
+	'''
+	space = canvas_width*0.5-border
+	variance = int(space*0.3)
+	left = (space)*rn.randint(40,80)/100
+	right = (space)*rn.randint(40,80)/100
+	for i in range(1,amount):
+		coords = [canvas_width*0.5-(left+rn.randint(-variance,variance))*math.sin(math.pi*0.15+math.pi*0.7*i/amount), border+i*step, canvas_width*0.5+(right+rn.randint(-variance,variance))*math.sin(math.pi*0.15+math.pi*0.7*i/amount), border+i*step]
+		draw_line(coords,line_color,width)
 
-background = '#777777' #program background color
+def draw_separation(event): #shapes that are separated by an outline of the background color
+	amount = rn.randint(10,30)
+	#outline = rn.randint(10,70) #width of the outline around each shape
+	bg_color = get_color()
+	draw_color(bg_color)
+	shape_color = get_color()
+	for i in range(amount):
+		coords = get_coordinates(rn.randint(3,7))
+		if rn.randint(0,3) == 0:
+			oval = get_coordinates(2)
+			draw_ellipse(oval,bg_color,'outline')
+			draw_ellipse(oval,shape_color,'filled')
+		else:
+			draw_polygon(coords,bg_color,'outline')
+			draw_polygon(coords,shape_color,'filled')
+
+
+background = '#777780' #program background color
 bwidth = 14 #button width
-bcolor = '#666666'
-bborder = 5
-brelief = 'raised'
-bfont = 'Bahnschrift 9'
-lfont = 'Bahnschrift 11' #label font
+bcolor = '#444455'
+bfontcolor = '#ffffff'
+bborder = 3
+brelief = 'flat'
+bfont = 'Nimbus 10' #Bahnschrift
+lfont = 'Nimbus 12' #label font
 
 root = tk.Tk()
 geometry = str(canvas_width+660)+'x'+str(canvas_height+4)
@@ -868,42 +914,44 @@ f_buttons_midbot.pack(anchor='c', pady=5)
 f_buttons_bottom = tk.Frame(f_right, bg=background)
 f_buttons_bottom.pack(anchor='s', pady=5)
 
-b_image = tk.Button(f_buttons_top, state='normal', command=lambda:draw_image(''), text='image', width=bwidth, bg='yellow', fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
-b_blacknwhite = tk.Button(f_buttons_top, state='normal', command=lambda:draw_blacknwhite(''), text='blacknwhite', width=bwidth, bg='green', fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
-b_threecolors = tk.Button(f_buttons_top, state='normal', command=lambda:draw_threecolors(''), text='threecolors', width=bwidth, bg='blue', fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
-b_pixels = tk.Button(f_buttons_top, state='normal', command=lambda:draw_pixels(''), text='pixels', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
-b_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_color(''), text='color', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
-b_gradient = tk.Button(f_buttons_top, state='normal', command=lambda:draw_gradient(get_color(),get_color()), text='gradient', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
-b_perspective = tk.Button(f_buttons_top, state='normal', command=lambda:draw_perspective(''), text='perspective', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=3,column=0)
-b_monocolor = tk.Button(f_buttons_top, state='normal', command=lambda:draw_monocolor(''), text='monocolor', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=3,column=1)
-b_pattern = tk.Button(f_buttons_top, state='normal', command=lambda:draw_pattern(''), text='pattern', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
-b_swirls = tk.Button(f_buttons_top, state='disabled', command=lambda:draw_swirls(''), text='swirls', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=1)
-b_colorwall = tk.Button(f_buttons_top, state='normal', command=lambda:draw_colorwall(''), text='colorwall', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=5,column=0)
-b_spectrum = tk.Button(f_buttons_top, state='normal', command=lambda:draw_spectrum(''), text='spectrum', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=5,column=1)
-b_voronoi = tk.Button(f_buttons_top, state='normal', command=lambda:draw_voronoi(''), text='voronoi', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=6,column=0)
-b_text = tk.Button(f_buttons_top, state='disabled', command=lambda:draw_text(''), text='text', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=6,column=1)
-b_paper = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paper(''), text='paper', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=7,column=0)
-b_patch = tk.Button(f_buttons_top, state='normal', command=lambda:draw_patch(''), text='patch', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=7,column=1)
-b_bubbles = tk.Button(f_buttons_top, state='normal', command=lambda:draw_bubbles(''), text='bubbles', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=8,column=0)
+b_image = tk.Button(f_buttons_top, state='normal', command=lambda:draw_image(''), text='image', width=bwidth, bg='yellow', fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
+b_blacknwhite = tk.Button(f_buttons_top, state='normal', command=lambda:draw_blacknwhite(''), text='blacknwhite', width=bwidth, bg='green', fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
+b_threecolors = tk.Button(f_buttons_top, state='normal', command=lambda:draw_threecolors(''), text='threecolors', width=bwidth, bg='blue', fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
+b_pixels = tk.Button(f_buttons_top, state='normal', command=lambda:draw_pixels(''), text='pixels', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
+b_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_color(''), text='color', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
+b_gradient = tk.Button(f_buttons_top, state='normal', command=lambda:draw_gradient(get_color(),get_color()), text='gradient', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
+b_perspective = tk.Button(f_buttons_top, state='normal', command=lambda:draw_perspective(''), text='perspective', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=3,column=0)
+b_monocolor = tk.Button(f_buttons_top, state='normal', command=lambda:draw_monocolor(''), text='monocolor', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=3,column=1)
+b_pattern = tk.Button(f_buttons_top, state='normal', command=lambda:draw_pattern(''), text='pattern', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
+b_swirls = tk.Button(f_buttons_top, state='disabled', command=lambda:draw_swirls(''), text='swirls', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=4,column=1)
+b_colorwall = tk.Button(f_buttons_top, state='normal', command=lambda:draw_colorwall(''), text='colorwall', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=5,column=0)
+b_spectrum = tk.Button(f_buttons_top, state='normal', command=lambda:draw_spectrum(''), text='spectrum', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=5,column=1)
+b_voronoi = tk.Button(f_buttons_top, state='normal', command=lambda:draw_voronoi(''), text='voronoi', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=6,column=0)
+b_text = tk.Button(f_buttons_top, state='disabled', command=lambda:draw_text(''), text='text', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=6,column=1)
+b_paper = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paper(''), text='paper', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=7,column=0)
+b_patch = tk.Button(f_buttons_top, state='normal', command=lambda:draw_patch(''), text='patch', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=7,column=1)
+b_bubbles = tk.Button(f_buttons_top, state='normal', command=lambda:draw_bubbles(''), text='bubbles', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=8,column=0)
+b_streaks = tk.Button(f_buttons_top, state='normal', command=lambda:draw_streaks(''), text='streaks', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=8,column=1)
+b_separation = tk.Button(f_buttons_top, state='normal', command=lambda:draw_separation(''), text='separation', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=9,column=0)
 
-b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
-b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
-b_polyline = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polyline('', '', ''), text='polyline', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
-b_stroke = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_stroke(''), text='stroke', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
-b_threedee = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_threedee(''), text='3D', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
-b_rgb = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_rgb(''), text='RGB', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
-b_colorline = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_colorline(''), text='colorline', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=3,column=0)
-b_colorpolygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_colorpolygon(''), text='colorpolygon', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=3,column=1)
-b_radial = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_radial(''), text='radial', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
-b_symmetry = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_symmetry(''), text='symmetry', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=4,column=1)
-b_mandala = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_mandala(''), text='mandala', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=5,column=0)
+b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
+b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
+b_polyline = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polyline('', '', ''), text='polyline', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
+b_stroke = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_stroke(''), text='stroke', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
+b_threedee = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_threedee(''), text='3D', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
+b_rgb = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_rgb(''), text='RGB', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
+b_colorline = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_colorline(''), text='colorline', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=3,column=0)
+b_colorpolygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_colorpolygon(''), text='colorpolygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=3,column=1)
+b_radial = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_radial(''), text='radial', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
+b_symmetry = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_symmetry(''), text='symmetry', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=4,column=1)
+b_mandala = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_mandala(''), text='mandala', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=5,column=0)
 
-b_line = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_line('', '', ''), text='line', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
-b_arc = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_arc(''), text='arc', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
-b_rectangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_rectangle('','',''), text='rectangle', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
-b_ellipse = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_ellipse('', '', ''), text='ellipse', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
-b_triangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_triangle(''), text='triangle', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
-b_diamond = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_diamond(''), text='diamond', width=bwidth, bg=bcolor, fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
+b_line = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_line('', '', ''), text='line', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
+b_arc = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_arc(''), text='arc', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
+b_rectangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_rectangle('','',''), text='rectangle', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
+b_ellipse = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_ellipse('', '', ''), text='ellipse', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
+b_triangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_triangle(''), text='triangle', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
+b_diamond = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_diamond(''), text='diamond', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
 
 adj_b_width = int(round(bwidth*0.58,0)) #special width for save prev delete buttons
 b_save = tk.Button(f_buttons_bottom, state='normal', command=lambda:save(''), text='save svg', width=adj_b_width, bg='gold', fg='black', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
