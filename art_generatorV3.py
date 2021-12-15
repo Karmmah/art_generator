@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #ideas:
 #piet mondrian style pattern
 #stroke function
@@ -7,10 +9,12 @@
 #circular gradient
 #auswahlbox für art des kunstwerks (pattern, symmetry, mandala, comic, ...)
 #custom color sets (farben eingeben die dann ausschließlich verwendet werden)
+#punktwolke nach normalverteilung in artgen (mehr punkte in der mitte, als am rand -> Haufen in der Mitte)
 
 #anmerkung für nächste version:
-#-parameter als array übergeben statt einzeln
-#-bei jeder funktion erst seed generieren, daraus bild malen, seed abspeichern (evtl auf dem bild als text)
+#parameter als array übergeben statt einzeln
+#bei jeder funktion erst seed generieren, daraus bild malen, seed abspeichern (evtl auf dem bild als text)
+#standard methoden in eigenes modul und dann importierenfs
 
 #https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Basic_Shapes
 
@@ -526,12 +530,12 @@ def draw_pattern(event):
         draw_patch('')
     else:
         draw_color('')
-    pattern_amount_x = rn.randint(6,25) #how many pattern elements are drawn per line
+    pattern_amount_x = rn.randint(5,15) #how many pattern elements are drawn per line
     pattern_amount_y = int(round(pattern_amount_x*(canvas_height/canvas_width),0))
     pattern_width = (canvas_width-2*border)/pattern_amount_x #pixel size of each tile
     line_width = 195/pattern_amount_x #line_width = 95/pattern_amount_x*rn.randint(90,110)*0.01
     color = get_color()
-    pattern_nr = rn.randint(0,6) #which pattern to draw
+    pattern_nr = rn.randint(6,6) #which pattern to draw
     if pattern_nr == 0: #slash pattern
         for i in range(pattern_amount_y):
             for j in range(pattern_amount_x):
@@ -671,18 +675,35 @@ def draw_pattern(event):
         amount = rn.randint(1,6)
         width = line_width*0.4/(0.5*amount)
         og_coords = []
+        measurements = []
+        x_midpoint = border+pattern_width*0.5
+        y_midpoint = x_midpoint
         for i in range(amount):
-            x1, y1 = rn.randint(border, int(border+pattern_width)), rn.randint(border, int(border+pattern_width))
-            x2, y2 = rn.randint(border, int(border+pattern_width)), rn.randint(border, int(border+pattern_width))
+            x1, y1 = rn.randint(border,int(border+pattern_width)), rn.randint(border,int(border+pattern_width))
+            x2, y2 = rn.randint(border,int(border+pattern_width)), rn.randint(border,int(border+pattern_width))
             og_coords.append(x1)
             og_coords.append(y1)
             og_coords.append(x2)
             og_coords.append(y2)
+            #new rotation part
+            angle1 = math.atan((y_midpoint-y1)/(x1-x_midpoint))
+            angle2 = math.atan((y_midpoint-y2)/(x2-x_midpoint))
+            measurements.append(angle1)
+            measurements.append(angle2)
+            d1 = math.sqrt((x1-x_midpoint)**2+(y1-y_midpoint)**2)
+            d2 = math.sqrt((x2-x_midpoint)**2+(y2-y_midpoint)**2)
+            measurements.append(d1)
+            measurements.append(d2)
         color = get_color()
         for i in range(pattern_amount_y):
             for j in range(pattern_amount_x):
+                rotation = rn.randint(0,3) #how many pi/2 times to rotate current tile
                 for k in range(amount):
-                    coords = [og_coords[4*k]+j*pattern_width, og_coords[4*k+1]+i*pattern_width, og_coords[4*k+2]+j*pattern_width, og_coords[4*k+3]+i*pattern_width]
+                    x1 = og_coords[4*k]+j*pattern_width+math.cos(measurements[4*k]+rotation*math.pi)*measurements[4*k+2]
+                    y1 = og_coords[4*k+1]+i*pattern_width+math.sin(measurements[4*k]+rotation*math.pi)*measurements[4*k+2]
+                    x2 = og_coords[4*k+2]+j*pattern_width+math.cos(measurements[4*k+1]+rotation*math.pi)*measurements[4*k+3]
+                    y2 = og_coords[4*k+3]+i*pattern_width+math.sin(measurements[4*k+1]+rotation*math.pi)*measurements[4*k+3]
+                    coords = [x1, y1, x2, y2]
                     draw_line(coords, color, width)
 
 def draw_mandala(event):
@@ -813,8 +834,7 @@ def draw_bubbles(event):
 	for i in range(references,amount-1): #draw colored circles colored according to nearest reference
 		canvas_factor = 10*canvas_height*(1+amount/rn.randint(700,1300))/amount
 		size = int(0.5*rn.randint(int(canvas_factor*0.7),int(canvas_factor*1.3)))
-		x1,y1 = coordinates[2*i]-size, coordinates[2*i+1]-size
-		x2,y2 = coordinates[2*i]+size, coordinates[2*i+1]+size
+		x1,y1,x2,y2 = coordinates[2*i]-size, coordinates[2*i+1]-size, coordinates[2*i]+size, coordinates[2*i+1]+size
 		coords = [x1,y1,x2,y2]
 		distances = []
 		for j in range(references): #calculate which reference is closest
@@ -834,12 +854,12 @@ def draw_bubbles(event):
 		coords = [x1,y1,x2,y2]
 		draw_ellipse(coords,'#000000','filled')'''
 
-def draw_streaks(event):
+def draw_waveform(event):
 	draw_color('')
 	border = int(e_border.get())
-	amount = rn.randint(7,42)
+	amount = rn.randint(42,100)#7,42)
 	line_color = get_color()
-	width = canvas_height/(amount*2.5)
+	width = canvas_height/(amount*2.5)*1.3
 	step = (canvas_height-2*border)/amount
 	'''
 	for i in range(amount):
@@ -848,8 +868,8 @@ def draw_streaks(event):
 	'''
 	space = canvas_width*0.5-border
 	variance = int(space*0.3)
-	left = (space)*rn.randint(40,80)/100
-	right = (space)*rn.randint(40,80)/100
+	left = (space)*rn.randint(40,90)/100
+	right = (space)*rn.randint(40,90)/100
 	for i in range(1,amount):
 		coords = [canvas_width*0.5-(left+rn.randint(-variance,variance))*math.sin(math.pi*0.15+math.pi*0.7*i/amount), border+i*step, canvas_width*0.5+(right+rn.randint(-variance,variance))*math.sin(math.pi*0.15+math.pi*0.7*i/amount), border+i*step]
 		draw_line(coords,line_color,width)
@@ -869,6 +889,40 @@ def draw_separation(event): #shapes that are separated by an outline of the back
 		else:
 			draw_polygon(coords,bg_color,'outline')
 			draw_polygon(coords,shape_color,'filled')
+
+def draw_paths(event):
+	draw_color('')
+	border = int(e_border.get())
+	line_amount = rn.randint(5,20)
+	div_amount = rn.randint(5,8)
+	width = 20*6/line_amount
+	color = get_color()
+	if rn.randint(0,1) == 0: #horizontal
+		x_step = (canvas_width-2*border)/div_amount
+		for i in range(line_amount):
+			coords = []
+			for j in range(div_amount+1):
+				offset = rn.randint(-int((canvas_height-2*border)*1/line_amount),int((canvas_height-2*border)*1/line_amount))
+				y = border+i*(canvas_height-2*border)/line_amount+offset
+				if y < border or y > canvas_height-border:
+					y = border+i*(canvas_height-2*border)/line_amount-offset
+				x = border+j*x_step
+				coords.append(x)
+				coords.append(y)
+			draw_polyline(coords, color, width)
+	else: #vertical
+		y_step = (canvas_height-2*border)/div_amount
+		for i in range(line_amount):
+			coords = []
+			for j in range(div_amount+1):
+				offset = rn.randint(-int((canvas_width-2*border)*1/line_amount),int((canvas_width-2*border)*1/line_amount))
+				x = border+i*(canvas_width-2*border)/line_amount+offset
+				if x < border or x > canvas_width-border:
+					x = border+i*(canvas_width-2*border)/line_amount-offset
+				y = border+j*y_step
+				coords.append(x)
+				coords.append(y)
+			draw_polyline(coords, color, width)
 
 
 background = '#777780' #program background color
@@ -931,8 +985,9 @@ b_text = tk.Button(f_buttons_top, state='disabled', command=lambda:draw_text('')
 b_paper = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paper(''), text='paper', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=7,column=0)
 b_patch = tk.Button(f_buttons_top, state='normal', command=lambda:draw_patch(''), text='patch', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=7,column=1)
 b_bubbles = tk.Button(f_buttons_top, state='normal', command=lambda:draw_bubbles(''), text='bubbles', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=8,column=0)
-b_streaks = tk.Button(f_buttons_top, state='normal', command=lambda:draw_streaks(''), text='streaks', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=8,column=1)
+b_waveform = tk.Button(f_buttons_top, state='normal', command=lambda:draw_waveform(''), text='waveform', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=8,column=1)
 b_separation = tk.Button(f_buttons_top, state='normal', command=lambda:draw_separation(''), text='separation', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=9,column=0)
+b_paths = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paths(''), text='paths', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=9,column=1)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
@@ -1000,5 +1055,19 @@ root.bind('<Control-d>', delete_canvas)
 
 global prev_drawing #save previous drawing for when skipping over one you like
 prev_drawing = get_svg()
+'''
+import time
+i = 0
+ref = int(time.time())
+now = ref
+while True:
+	draw_pixels('')
+	root.update()
+	if now != ref:
+		print(i)
+		i = 0
+		ref = now
+	now = int(time.time())
+	i += 1'''
 
 root.mainloop()
