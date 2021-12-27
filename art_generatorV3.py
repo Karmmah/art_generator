@@ -924,6 +924,76 @@ def draw_paths(event):
 				coords.append(y)
 			draw_polyline(coords, color, width)
 
+def draw_fractal(event):
+	draw_color('')
+	border = int(e_border.get())
+	x_space = canvas_width-2*border
+	y_space = canvas_height-2*border
+	recursion_level = -1
+	max_recursion_level = rn.randint(1,5)
+	coordinates = [border,border,canvas_width-border,canvas_height-border]
+	shape_mode = rn.randint(0,4)
+	if shape_mode == 4:
+		max_recursion_level = rn.randint(1,3)
+	color_mode = rn.randint(0,1)
+	if color_mode == 0:
+		color = get_gradient(get_color(),get_color(),max_recursion_level+1)
+	else:
+		c = get_color()
+		color = [c]*(max_recursion_level+1)
+	fractal_recursion(coordinates,recursion_level,max_recursion_level,color,shape_mode,color_mode)
+
+def fractal_recursion(coordinates,recursion_level,max_recursion_level,color,shape_mode,color_mode):
+	x_length = coordinates[2]-coordinates[0]
+	y_length = coordinates[3]-coordinates[1]
+	if recursion_level < max_recursion_level:
+		recursion_level += 1
+		for i in range(4):
+			x1 = coordinates[0]+i%2*x_length/2
+			x2 = x1+x_length/2
+			if i%4 < 2:
+				y1, y2 = coordinates[1], coordinates[1]+y_length/2
+			else:
+				y1, y2 = coordinates[1]+y_length/2, coordinates[3]
+			new_coordinates = [x1,y1,x2,y2]
+			fractal_recursion(new_coordinates,recursion_level,max_recursion_level,color,shape_mode,color_mode)
+	coords = [coordinates[0]+x_length/4,coordinates[1]+y_length/4,coordinates[2]-x_length/4,coordinates[3]-y_length/4]
+	if shape_mode == 0:
+		draw_rectangle(coords,color[recursion_level],'outline')
+	elif shape_mode == 1:
+		draw_rectangle(coords,color[recursion_level],'filled')
+	elif shape_mode == 2:
+		draw_ellipse(coords,color[recursion_level],'outline')
+	elif shape_mode == 3:
+		draw_ellipse(coords,color[recursion_level],'filled')
+	else:
+		width = 12/(recursion_level+1)
+		draw_line(coords,color[recursion_level],width)
+		mirrored_coords = [coords[2],coords[1],coords[0],coords[3]]
+		draw_line(mirrored_coords,color[recursion_level],width)
+'''
+def draw_starlight(event):
+	point = get_coordinates(1)
+	number_of_rays = rn.randint(5,12)
+	angle_offset = rn.randint(0,200)/100*math.pi
+	for i in range(number_of_rays):
+		#-for each ray calculate which border it intersects and where
+		#-depending on the angle of the ray, just check borders in that direction
+		angle = angle_offset+i*2*math.pi/number_of_rays
+		if 0<=angle<=math.pi/2:
+			x_intersection = (border-point[1])/angle+point[0] if angle != 0 else canvas_width
+			if x_intersection >= canvas_width-border:
+				x_intersection = canvas_width-border
+				y_intersection = 
+			else:
+				pass
+		elif math.pi/2<angle<=math.pi:
+			pass
+		elif math.pi<angle<=math.pi*3/2:
+			pass
+		else:
+			pass
+'''
 
 background = '#777780' #program background color
 bwidth = 14 #button width
@@ -935,7 +1005,7 @@ bfont = 'Nimbus 10' #Bahnschrift
 lfont = 'Nimbus 12' #label font
 
 root = tk.Tk()
-geometry = str(canvas_width+660)+'x'+str(canvas_height+4)
+geometry = str(canvas_width+700)+'x'+str(canvas_height+4)
 root.geometry(geometry)
 root.title('Art Generator V3 - by Karmmah')
 img = tk.Image("photo", file="art_generator_logo2.gif")
@@ -988,6 +1058,7 @@ b_bubbles = tk.Button(f_buttons_top, state='normal', command=lambda:draw_bubbles
 b_waveform = tk.Button(f_buttons_top, state='normal', command=lambda:draw_waveform(''), text='waveform', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=8,column=1)
 b_separation = tk.Button(f_buttons_top, state='normal', command=lambda:draw_separation(''), text='separation', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=9,column=0)
 b_paths = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paths(''), text='paths', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=9,column=1)
+b_fractal = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fractal(''), text='fractal', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=10,column=0)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
@@ -1000,6 +1071,7 @@ b_colorpolygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw
 b_radial = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_radial(''), text='radial', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
 b_symmetry = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_symmetry(''), text='symmetry', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=4,column=1)
 b_mandala = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_mandala(''), text='mandala', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=5,column=0)
+b_starlight = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_starlight(''), text='starlight', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=5,column=1)
 
 b_line = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_line('', '', ''), text='line', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_arc = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_arc(''), text='arc', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
@@ -1055,19 +1127,5 @@ root.bind('<Control-d>', delete_canvas)
 
 global prev_drawing #save previous drawing for when skipping over one you like
 prev_drawing = get_svg()
-'''
-import time
-i = 0
-ref = int(time.time())
-now = ref
-while True:
-	draw_pixels('')
-	root.update()
-	if now != ref:
-		print(i)
-		i = 0
-		ref = now
-	now = int(time.time())
-	i += 1'''
 
 root.mainloop()
