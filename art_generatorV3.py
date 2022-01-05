@@ -18,6 +18,13 @@
 
 #https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Basic_Shapes
 
+
+
+#canvas.find_all() to get handles of all objects on canvas
+#canvas.coords(<object handle>) to get coordinates of object
+
+
+
 import tkinter as tk
 import random as rn
 import math
@@ -251,7 +258,7 @@ def draw_polyline(coordinates, color, width): #path with multiple points
     collect_output(output,'')
 
 def draw_polygon(coordinates, color, mode): #mode can also be number, to set outline width
-    coordinates = coordinates if coordinates != '' else get_coordinates(rn.randint(5,10)) #if no coordinates are given, get random ones
+    coordinates = coordinates if coordinates != '' else get_coordinates(rn.randint(3,5)) #if no coordinates are given, get random ones
     output = '\n<polygon points="' #svg output
     for i in range(len(coordinates)): #add coordinates to svg output
         output = output + str(coordinates[i])+' '
@@ -505,8 +512,8 @@ def draw_colorwall(event):
         color2 = get_color()
         colors = get_gradient(color1,color2,amount+1)
     draw_color(colors[0])
-    x_left, x_right = -200, canvas_width+200 #bottom coordinates overhanging canvas, shared by all polygons
-    y_bottom = canvas_height+200
+    x_left, x_right = -1, canvas_width+1 #bottom coordinates overhanging canvas, shared by all polygons
+    y_bottom = canvas_height+1
     for i in range(amount):
         coordinates = [x_right,y_bottom,x_left,y_bottom]
         y_line = (i+0.5)*(canvas_height/(amount))
@@ -742,7 +749,7 @@ def draw_colorline(event):
     draw_polyline(coordinates, get_color(), width)
 
 def draw_colorpolygon(event):
-    amount = rn.randint(3,13)
+    amount = rn.randint(3,5)
     coordinates = get_coordinates(amount)
     width = rn.randint(10,30)
     draw_polygon(coordinates, get_color(), width*2)
@@ -971,6 +978,21 @@ def fractal_recursion(coordinates,recursion_level,max_recursion_level,color,shap
 		draw_line(coords,color[recursion_level],width)
 		mirrored_coords = [coords[2],coords[1],coords[0],coords[3]]
 		draw_line(mirrored_coords,color[recursion_level],width)
+
+def draw_spray(event):
+	draw_color('')
+	color1,color2 = get_color(),get_color()
+	amount = rn.randint(200,500)
+	cutoff = amount*rn.randint(75,92)/100
+	for i in range(amount):
+		center = get_coordinates(1)
+		radius = rn.randint(10,20)
+		coords = [center[0]-radius,center[1]-radius,center[0]+radius,center[1]+radius]
+		if i > cutoff:
+			draw_ellipse(coords,color1,'filled') #(coordinates, color, mode):
+		else:
+			draw_ellipse(coords,color2,'filled')
+
 '''
 def draw_starlight(event):
 	point = get_coordinates(1)
@@ -1059,6 +1081,7 @@ b_waveform = tk.Button(f_buttons_top, state='normal', command=lambda:draw_wavefo
 b_separation = tk.Button(f_buttons_top, state='normal', command=lambda:draw_separation(''), text='separation', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=9,column=0)
 b_paths = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paths(''), text='paths', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=9,column=1)
 b_fractal = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fractal(''), text='fractal', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=10,column=0)
+b_spray = tk.Button(f_buttons_top, state='normal', command=lambda:draw_spray(''), text='spray', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=10,column=1)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
