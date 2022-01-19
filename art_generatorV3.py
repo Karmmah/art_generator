@@ -122,6 +122,19 @@ def get_color():
 	elif grayscale_mode.get() == 1:
 		gray = rn.randint(0,255)
 		color = '#'+str(hex(gray).lstrip('0x'))+str(hex(gray).lstrip('0x'))+str(hex(gray).lstrip('0x'))
+	elif custom_mode.get() == 1:
+		colors = []
+		if b_color1['bg'] != '#000001':
+			colors.append(b_color1['bg'])
+		if b_color2['bg'] != '#000001':
+			colors.append(b_color2['bg'])
+		if b_color3['bg'] != '#000001':
+			colors.append(b_color3['bg'])
+		if b_color4['bg'] != '#000001':
+			colors.append(b_color4['bg'])
+		if b_color5['bg'] != '#000001':
+			colors.append(b_color5['bg'])
+		color = colors[rn.randint(0,len(colors)-1)] if len(colors)>0 else '#ffffff'
 	else: #random color
 		color = '#'+hex(rn.randint(0,16777215)).lstrip('0x')
 	if len(color) < 7:
@@ -443,9 +456,9 @@ def draw_symmetry(event):
     draw_polygon(coordinates, color, mode)
     draw_polygon(mirrored_coordinates, color, mode)
 
-def draw_triangle(event):
+def draw_triangle(event,color):
     coordinates = get_coordinates(3)
-    draw_polygon(coordinates, '', '')
+    draw_polygon(coordinates, color, '')
 
 def draw_spectrum(event):
     points = rn.randint(4,8)
@@ -993,6 +1006,18 @@ def draw_spray(event):
 		else:
 			draw_ellipse(coords,color2,'filled')
 
+def draw_gradient_image(event):
+	draw_color('')
+	amount = rn.randint(7,16) #how many shapes to draw
+	gradient = get_gradient(get_color(),get_color(),amount)
+#	draw_color(gradient[0])
+	for i in range(amount):
+		shape = rn.randint(0,1)
+		if shape == 0:
+			draw_triangle('',gradient[i])
+		elif shape == 1:
+			draw_rectangle('',gradient[i],'filled')
+
 '''
 def draw_starlight(event):
 	point = get_coordinates(1)
@@ -1027,12 +1052,12 @@ bfont = 'Nimbus 10' #Bahnschrift
 lfont = 'Nimbus 12' #label font
 
 root = tk.Tk()
-geometry = str(canvas_width+700)+'x'+str(canvas_height+4)
+geometry = str(canvas_width+700)+'x'+str(canvas_height+4) #size of the window
 root.geometry(geometry)
 root.title('Art Generator V3 - by Karmmah')
-img = tk.Image("photo", file="art_generator_logo2.gif")
-root.tk.call('wm', 'iconphoto', root._w, img)
 root.configure(bg=background)
+img = tk.Image("photo", file="art_generator_logo2.gif") #program icon in window bar
+root.tk.call('wm', 'iconphoto', root._w, img)
 
 f_left = tk.Frame(root, bg=background)
 f_left.place(relx=0.03, rely=0.5, anchor='w')
@@ -1042,6 +1067,15 @@ f_canvas.place(relx=0.5, anchor='n')
 
 f_right = tk.Frame(root, bg=background)
 f_right.place(relx=0.99, rely=0.5, anchor='e')
+
+#input fields for borders
+f_border = tk.Frame(f_left, relief='raised', bd=bborder, highlightcolor='white', bg=bcolor)
+f_border.pack(pady=5, ipady=1)
+l_border = tk.Label(f_border, text='Border:', font=bfont, fg='white', bg=bcolor)
+l_border.grid(row=0,column=0, padx=10)
+e_border = tk.Entry(f_border, width=5, font=bfont, justify='right')
+e_border.grid(row=0,column=1, padx=10)
+e_border.insert('end', 100)#int((canvas_height-canvas_height/1.618)*0.5))
 
 canvas = tk.Canvas(f_canvas, width=canvas_width, height=canvas_height, bg='white', bd=0, highlightbackground=background)
 canvas.pack()
@@ -1082,6 +1116,7 @@ b_separation = tk.Button(f_buttons_top, state='normal', command=lambda:draw_sepa
 b_paths = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paths(''), text='paths', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=9,column=1)
 b_fractal = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fractal(''), text='fractal', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=10,column=0)
 b_spray = tk.Button(f_buttons_top, state='normal', command=lambda:draw_spray(''), text='spray', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=10,column=1)
+b_gradient_image = tk.Button(f_buttons_top, state='normal', command=lambda:draw_gradient_image(''), text='gradient image', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=11,column=0)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
@@ -1100,7 +1135,7 @@ b_line = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_line(''
 b_arc = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_arc(''), text='arc', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
 b_rectangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_rectangle('','',''), text='rectangle', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
 b_ellipse = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_ellipse('', '', ''), text='ellipse', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
-b_triangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_triangle(''), text='triangle', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
+b_triangle = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_triangle('',''), text='triangle', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
 b_diamond = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_diamond(''), text='diamond', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
 
 adj_b_width = int(round(bwidth*0.58,0)) #special width for save prev delete buttons
@@ -1108,21 +1143,15 @@ b_save = tk.Button(f_buttons_bottom, state='normal', command=lambda:save(''), te
 b_previous = tk.Button(f_buttons_bottom, state='normal', command=lambda:save_previous(''), text='previous', width=adj_b_width, bg='#d4aa00', fg='black', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
 b_delete = tk.Button(f_buttons_bottom, state='normal', command=lambda:delete_canvas(''), text='delete (D)', width=adj_b_width, bg='#d40000', fg='white', font=bfont, bd=bborder, relief=brelief).grid(row=0,column=2)
 
+l_info = tk.Label(f_right, text='Shortcuts: Ctrl+(Button)', font=lfont, bg='white', fg='black')
+l_info.pack(anchor='s', pady=15)
+
 #color backup: #00cc00
-s_crazyness = tk.Scale(f_left, state='disabled', orient='h', length=bwidth*15, from_=1, highlightbackground='white', troughcolor='#00d1a0', bg=bcolor, fg='white', label='Crazyness', font=lfont, relief=brelief, bd=bborder)
-s_crazyness.pack(pady=5)
-s_crazyness.set(22)
+#s_crazyness = tk.Scale(f_left, state='disabled', orient='h', length=bwidth*15, from_=1, highlightbackground='white', troughcolor='#00d1a0', bg=bcolor, fg='white', label='Crazyness', font=lfont, relief=brelief, bd=bborder)
+#s_crazyness.pack(pady=5)
+#s_crazyness.set(22)
 
-#input fields for borders
-f_border = tk.Frame(f_left, relief='raised', bd=bborder, highlightcolor='white', bg=bcolor)
-f_border.pack(pady=5, ipady=1)
-l_border = tk.Label(f_border, text='Border:', font=bfont, fg='white', bg=bcolor)
-l_border.grid(row=0,column=0, padx=10)
-e_border = tk.Entry(f_border, width=5, font=bfont, justify='right')
-e_border.grid(row=0,column=1, padx=10)
-e_border.insert('end', int((canvas_height-canvas_height/1.618)*0.5))
-
-test_mode = tk.IntVar()
+test_mode = tk.IntVar() #if test mode is selected, number of artworks in saved file is not increased after save
 c_save = tk.Checkbutton(f_left, text='test export', variable=test_mode, font=bfont, bg=bcolor, fg='white')
 c_save.pack()
 
@@ -1143,10 +1172,54 @@ grayscale_mode = tk.IntVar()
 c_grayscale = tk.Checkbutton(f_colormodes, text='grayscale', variable=grayscale_mode, font=bfont, bg=bcolor, fg='white')
 c_grayscale.pack()
 
-l_info = tk.Label(f_right, text='Shortcuts: Ctrl+(Button)', font=lfont, bg='white', fg='black')
-l_info.pack(anchor='s', pady=15)
+colorselection_width = bwidth*15
 
-root.bind('<Control-d>', delete_canvas)
+def colorselection(event):
+	color = [hex(int(s_red.get())).lstrip('0x'), hex(int(s_green.get())).lstrip('0x'), hex(int(s_blue.get())).lstrip('0x')]
+	for i in range(len(color)):
+		while len(color[i])<2:
+			 color[i] = '0'+color[i]
+	l_color['bg'] = '#'+color[0]+color[1]+color[2]
+
+f_colorselection = tk.Frame(f_left,relief='raised',bd=bborder,highlightcolor='white',bg=bcolor)
+f_colorselection.pack(pady=5,ipady=1)
+l_color = tk.Label(f_colorselection,width=26,height=2,bg='black')
+l_color.grid(row=1,columnspan=5)
+s_red = tk.Scale(f_colorselection,orient='h',length=colorselection_width,to=255,command=colorselection)
+s_green = tk.Scale(f_colorselection,orient='h',length=colorselection_width,to=255,command=colorselection)
+s_blue = tk.Scale(f_colorselection,orient='h',length=colorselection_width,to=255,command=colorselection)
+s_red.grid(row=2,columnspan=5)
+s_green.grid(row=3,columnspan=5)
+s_blue.grid(row=4,columnspan=5)
+
+def colorbuttons(button_number):
+	if button_number == 1:
+		b_color1['bg'] = l_color['bg']
+	elif button_number == 2:
+		b_color2['bg'] = l_color['bg']
+	elif button_number == 3:
+		b_color3['bg'] = l_color['bg']
+	elif button_number == 4:
+		b_color4['bg'] = l_color['bg']
+	elif button_number == 5:
+		b_color5['bg'] = l_color['bg']
+
+b_color1 = tk.Button(f_colorselection,relief='flat',border=bborder,bg='#000001',command=lambda:colorbuttons(1))
+b_color2 = tk.Button(f_colorselection,relief='flat',border=bborder,bg='#000001',command=lambda:colorbuttons(2))
+b_color3 = tk.Button(f_colorselection,relief='flat',border=bborder,bg='#000001',command=lambda:colorbuttons(3))
+b_color4 = tk.Button(f_colorselection,relief='flat',border=bborder,bg='#000001',command=lambda:colorbuttons(4))
+b_color5 = tk.Button(f_colorselection,relief='flat',border=bborder,bg='#000001',command=lambda:colorbuttons(5))
+b_color1.grid(row=0,column=0)
+b_color2.grid(row=0,column=1)
+b_color3.grid(row=0,column=2)
+b_color4.grid(row=0,column=3)
+b_color5.grid(row=0,column=4)
+
+custom_mode = tk.IntVar() #color mode
+c_custom = tk.Checkbutton(f_colorselection, text='custom colors', variable=custom_mode, font=bfont, bg=bcolor, fg='white', borderwidth=0)
+c_custom.grid(row=5,columnspan=5)
+
+root.bind('<Control-d>',delete_canvas)
 
 global prev_drawing #save previous drawing for when skipping over one you like
 prev_drawing = get_svg()
