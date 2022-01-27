@@ -1018,6 +1018,59 @@ def draw_gradient_image(event):
 		elif shape == 1:
 			draw_rectangle('',gradient[i],'filled')
 
+def draw_double_color(event):
+	draw_paper('')
+	bg = '#fafafa'
+	border = int(e_border.get())
+	offset = border/2
+	draw_line([offset,offset,canvas_width-offset,offset],bg,border) #top edge of borderframe
+	draw_line([offset,offset,offset,canvas_height-offset],bg,border) #left edge
+	draw_line([canvas_width-offset,offset,canvas_width-offset,canvas_height-offset],bg,border) #right edge
+	draw_line([offset,canvas_height-offset,canvas_width-offset,canvas_height-offset],bg,border) #bottom edge
+	amount = rn.randint(2,5)
+	for i in range(amount):
+		coords = []
+		edges = rn.randint(3,15)
+		for j in range(edges):
+			point = [rn.randint(0,canvas_width),rn.randint(0,canvas_height)]
+			coords += point
+		draw_polygon(coords,bg,'filled')
+#	for i in range(amount):
+#		if rn.randint(0,1) == 0:
+#			coords1 = [rn.randint(0,canvas_width),0,rn.randint(0,canvas_width),canvas_height]
+#			coords2 = [rn.randint(0,canvas_width),0,rn.randint(0,canvas_width),canvas_height]
+#			coords = coords1+coords2
+#		else:
+#			coords1 = [0,rn.randint(0,canvas_height),canvas_width,rn.randint(0,canvas_height)]
+#			coords2 = [0,rn.randint(0,canvas_height),canvas_width,rn.randint(0,canvas_height)]
+#			coords = coords1+coords2
+#		draw_polygon(coords,bg,'filled')
+
+def draw_comet(color):
+	r_min = 30
+	r_max = 250
+	center = get_coordinates(1)
+	border = int(e_border.get())
+	if center[0]-r_max < border:
+		center = [center[0]+border,center[1]]
+	elif center[0]+r_max > canvas_width-border:
+		center = [center[0]-border,center[1]]
+	if center[1]-r_max < border:
+		center = [center[0],center[1]+border]
+	elif center[1]+r_max > canvas_height-border:
+		center = [center[0],center[1]-border]
+	amount = rn.randint(4,6)
+	coords = []
+	angle_offset = rn.randint(0,100)/100*2*math.pi
+	for i in range(amount):
+		angle = angle_offset+i*2*math.pi/amount
+		radius = rn.randint(r_min,r_max)
+		point = [center[0]+radius*math.cos(angle),center[1]-radius*math.sin(angle)]
+		coords += point
+	if not is_color(color):
+		color = get_color()
+	draw_polygon(coords,'','outline')
+
 '''
 def draw_starlight(event):
 	point = get_coordinates(1)
@@ -1117,6 +1170,7 @@ b_paths = tk.Button(f_buttons_top, state='normal', command=lambda:draw_paths('')
 b_fractal = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fractal(''), text='fractal', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=10,column=0)
 b_spray = tk.Button(f_buttons_top, state='normal', command=lambda:draw_spray(''), text='spray', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=10,column=1)
 b_gradient_image = tk.Button(f_buttons_top, state='normal', command=lambda:draw_gradient_image(''), text='gradient image', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=11,column=0)
+b_double_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_double_color(''), text='double color', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=11,column=1)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
@@ -1130,6 +1184,7 @@ b_radial = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_radia
 b_symmetry = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_symmetry(''), text='symmetry', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=4,column=1)
 b_mandala = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_mandala(''), text='mandala', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=5,column=0)
 b_starlight = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_starlight(''), text='starlight', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=5,column=1)
+b_comet = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comet(''), text='comet', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=6,column=0)
 
 b_line = tk.Button(f_buttons_midbot, state='normal', command=lambda:draw_line('', '', ''), text='line', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_arc = tk.Button(f_buttons_midbot, state='disabled', command=lambda:draw_arc(''), text='arc', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
