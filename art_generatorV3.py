@@ -770,14 +770,20 @@ def draw_colorpolygon(event):
     draw_polygon(coordinates, get_color(), 'filled')
 
 def draw_threedee(event):
-    offset = rn.randint(8,14)
+    offset = rn.randint(7,25)
     amount = rn.randint(3,9)
     coordinates = get_coordinates(amount)
-    cyan_coordinates = coordinates
-    red_coordinates = coordinates
-    for i in range(amount):
-        cyan_coordinates[2*i] = cyan_coordinates[2*i]+offset
-        red_coordinates[2*i] = red_coordinates[2*i]-offset
+    print(coordinates)
+    cyan_coordinates = []
+    red_coordinates = []
+    for i in range(len(coordinates)):
+        if i%2 == 0:
+            print(coordinates[i])
+            cyan_coordinates += [coordinates[i]+offset]
+            red_coordinates += [coordinates[i]-offset]
+        else:
+            cyan_coordinates += [coordinates[i]]
+            red_coordinates += [coordinates[i]]
     draw_polygon(cyan_coordinates, '#00ffff', 'filled')
     draw_polygon(red_coordinates, '#ff0000', 'filled')
     draw_polygon(coordinates, '#000000', 'filled')
@@ -1071,6 +1077,18 @@ def draw_comet(color):
 		color = get_color()
 	draw_polygon(coords,'','outline')
 
+def draw_fight(event):
+	colors = [get_color(),get_color()]
+	border = int(e_border.get())
+	amount = rn.randint(5,25)
+	draw_color("#ffffff")
+	for i in range(amount):
+		x1,y1 = i%2*canvas_width, rn.randint(0,canvas_height)
+		x2,y2 = i%2*canvas_width, rn.randint(0,canvas_height)
+		x3,y3 = rn.randint(border,canvas_width-border), rn.randint(0,canvas_height)
+		coords = [x1,y1,x2,y2,x3,y3]
+		draw_polygon(coords,colors[i%2],"filled")
+
 '''
 def draw_starlight(event):
 	point = get_coordinates(1)
@@ -1171,12 +1189,13 @@ b_fractal = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fractal
 b_spray = tk.Button(f_buttons_top, state='normal', command=lambda:draw_spray(''), text='spray', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=10,column=1)
 b_gradient_image = tk.Button(f_buttons_top, state='normal', command=lambda:draw_gradient_image(''), text='gradient image', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=11,column=0)
 b_double_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_double_color(''), text='double color', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=11,column=1)
+b_fight = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fight(''), text='fight', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=12,column=0)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
 b_polyline = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polyline('', '', ''), text='polyline', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
 b_stroke = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_stroke(''), text='stroke', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
-b_threedee = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_threedee(''), text='3D', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
+b_threedee = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_threedee(''), text='3D', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
 b_rgb = tk.Button(f_buttons_midtop, state='disabled', command=lambda:draw_rgb(''), text='RGB', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
 b_colorline = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_colorline(''), text='colorline', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=3,column=0)
 b_colorpolygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_colorpolygon(''), text='colorpolygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=3,column=1)
