@@ -1113,6 +1113,12 @@ def draw_starlight(event):
 			pass
 '''
 
+def draw_five(event):
+	draw_color("") ##fafafa")
+	for i in range(5):
+		draw_polygon("","","filled")
+
+
 background = '#777780' #program background color
 bwidth = 14 #button width
 bcolor = '#444455'
@@ -1170,7 +1176,7 @@ b_blacknwhite = tk.Button(f_buttons_top, state='normal', command=lambda:draw_bla
 b_threecolors = tk.Button(f_buttons_top, state='normal', command=lambda:draw_threecolors(''), text='threecolors', width=bwidth, bg='blue', fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=0)
 b_pixels = tk.Button(f_buttons_top, state='normal', command=lambda:draw_pixels(''), text='pixels', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=1,column=1)
 b_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_color(''), text='color', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=0)
-b_gradient = tk.Button(f_buttons_top, state='normal', command=lambda:draw_gradient(get_color(),get_color()), text='gradient', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
+b_gradient = tk.Button(f_buttons_top, state='disabled', command=lambda:draw_gradient(get_color(),get_color()), text='gradient', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=2,column=1)
 b_perspective = tk.Button(f_buttons_top, state='normal', command=lambda:draw_perspective(''), text='perspective', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=3,column=0)
 b_monocolor = tk.Button(f_buttons_top, state='normal', command=lambda:draw_monocolor(''), text='monocolor', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=3,column=1)
 b_pattern = tk.Button(f_buttons_top, state='normal', command=lambda:draw_pattern(''), text='pattern', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=4,column=0)
@@ -1190,6 +1196,7 @@ b_spray = tk.Button(f_buttons_top, state='normal', command=lambda:draw_spray('')
 b_gradient_image = tk.Button(f_buttons_top, state='normal', command=lambda:draw_gradient_image(''), text='gradient image', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=11,column=0)
 b_double_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_double_color(''), text='double color', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=11,column=1)
 b_fight = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fight(''), text='fight', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=12,column=0)
+b_five = tk.Button(f_buttons_top, state='normal', command=lambda:draw_five(''), text='five', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=12,column=1)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
