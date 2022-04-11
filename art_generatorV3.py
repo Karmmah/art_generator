@@ -328,16 +328,17 @@ def draw_threecolors(event): #random amount of shapes and background using just 
     draw_color(bg)
     color1 = get_color()
     color2 = get_color()
-    amount = rn.randint(3,12)
+    amount = rn.randint(7,20)#(3,12)
     draw_polygon('', color1, '') #have at least one polygon of each color
     draw_polygon('', color2, '')
     for i in range(amount-2):
-        if rn.randint(0,2) == 0:
-            draw_polygon('', color1, '')
-        elif rn.randint(0,2) == 0:
-            draw_polygon('', color2, '')
+        choice = rn.randint(0,4)
+        if choice == 0:
+            draw_polygon('', color1, 'filled')
+        elif choice == 1:
+            draw_polygon('', color2, 'filled')
         else:
-            draw_polygon('', bg, '')
+            draw_polygon('', bg, 'filled')
 
 def draw_radial(event): #orb shape
     revolutions = rn.randint(3,9) #how many time to go around
@@ -350,7 +351,6 @@ def draw_radial(event): #orb shape
     for i in range(revolutions):
         for j in range(resolution):
             percentage = (i+j/resolution)/revolutions #[0,1]
-            #print(percentage)
             r = (r_min+(r_max-r_min)*math.sin(percentage*math.pi))*rn.randint(93,107)*0.01
             phi = j*(360/resolution)+angle_offset
             x = int(round(canvas_width*0.5+math.cos(phi/180*math.pi)*r, 0))
@@ -568,51 +568,6 @@ def draw_pattern(event):
                 #canvas.create_line(x1,y1,x2,y2,fill=color,width=line_width,capstyle='round')
                 coordinates = [x1,y1,x2,y2]
                 draw_line(coordinates, color, line_width)
-##    elif pattern_nr == 1 or pattern_nr == 2: #rounded pattern
-##        for i in range(pattern_amount_y):
-##            for j in range(pattern_amount_x):
-##                if pattern_nr == 1:
-##                	tile_type = rn.randint(0,1)
-##                else:
-##                	tile_type = rn.randint(2,3)
-##                if tile_type == 0: #tile 1 (more pointy)
-##                    x1_1, y1_1 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
-##                    x2_1, y2_1 = border+pattern_width*j+pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*i+pattern_width*0.5*math.cos(math.pi*0.25)
-##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
-##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
-##                    x2_2, y2_2 = border+pattern_width*(j+1)-pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*(i+1)-pattern_width*0.5*math.cos(math.pi*0.25)
-##                    x3_2, y3_2 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
-##                elif tile_type == 1: #tile 2 (more pointy)
-##                    x1_1, y1_1 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
-##                    x2_1, y2_1 = border+pattern_width*(j+1)-pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*i+pattern_width*0.5*math.cos(math.pi*0.25)
-##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
-##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
-##                    x2_2, y2_2 = border+pattern_width*j+pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*(i+1)-pattern_width*0.5*math.cos(math.pi*0.25)
-##                    x3_2, y3_2 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
-##                elif tile_type == 2: #tile 3 (fully round)
-##                    x1_1, y1_1 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
-##                    x2_1, y2_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i+pattern_width*0.5
-##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
-##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
-##                    x2_2, y2_2 = border+pattern_width*(j+1)-pattern_width*0.5, border+pattern_width*(i+1)-pattern_width*0.5
-##                    x3_2, y3_2 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
-##                elif tile_type == 3: #tile 4 (fully round)
-##                    x1_1, y1_1 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
-##                    x2_1, y2_1 = border+pattern_width*(j+1)-pattern_width*0.5, border+pattern_width*i+pattern_width*0.5
-##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
-##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
-##                    x2_2, y2_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)-pattern_width*0.5
-##                    x3_2, y3_2 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
-##                else: #old tile
-##                    x1_1, y1_1 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
-##                    x2_1, y2_1 = border+pattern_width*j+pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*i+pattern_width*0.5*math.cos(math.pi*0.25)
-##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
-##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
-##                    x2_2, y2_2 = border+pattern_width*(j+1)-pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*(i+1)-pattern_width*0.5*math.cos(math.pi*0.25)
-##                    x3_2, y3_2 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
-##                if pattern_nr == 1 or pattern_nr == 2:
-##                	canvas.create_line(x1_1,y1_1,x2_1,y2_1,x3_1,y3_1,fill=color,width=line_width,capstyle='round',smooth=1)
-##                	canvas.create_line(x1_2,y1_2,x2_2,y2_2,x3_2,y3_2,fill=color,width=line_width,capstyle='round',smooth=1)
     elif pattern_nr == 3: #bar pattern
         bar_type = rn.randint(0,1)
         for i in range(pattern_amount_y):
@@ -773,12 +728,10 @@ def draw_threedee(event):
     offset = rn.randint(7,25)
     amount = rn.randint(3,9)
     coordinates = get_coordinates(amount)
-    print(coordinates)
     cyan_coordinates = []
     red_coordinates = []
     for i in range(len(coordinates)):
         if i%2 == 0:
-            print(coordinates[i])
             cyan_coordinates += [coordinates[i]+offset]
             red_coordinates += [coordinates[i]-offset]
         else:
@@ -793,7 +746,6 @@ def draw_voronoi(event): #NOT FINISHED
     draw_line(coords,'#000000',4) #draw line from p1 to p2
     distance = math.sqrt((coords[3]-coords[1])**2+(coords[2]-coords[0])**2) #calc distance from p2 to p1
     angle = math.atan((coords[3]-coords[1])/(coords[2]-coords[0])) #calc angle between line and horizontal
-    #print(angle*180/math.pi)
     xintersect = coords[0]+math.cos(angle)*distance*0.5 #calc halfway point between points
     yintersect = coords[1]+math.sin(angle)*distance*0.5
     coords2 = [coords[0],coords[1],xintersect,yintersect] #new coords for line from p1 to halfway point
