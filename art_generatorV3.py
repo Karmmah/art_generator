@@ -174,8 +174,7 @@ def get_coordinates(n): #return n number of coordinate pairs
     coordinates = []
     for i in range(n):
         x, y = round(rn.randint(border, canvas_width-border), 2), round(rn.randint(border, canvas_height-border), 2)
-        coordinates.append(x)
-        coordinates.append(y)
+        coordinates += [x,y]
     return coordinates
 
 def sort_coordinates(coordinates): #used in rectangle and ellipse to get correct width and height
@@ -1070,6 +1069,27 @@ def draw_five(event):
 	for i in range(5):
 		draw_polygon("","","filled")
 
+def draw_net(event):
+	draw_color(get_color())
+	amount = rn.randint(4,10)
+	points = get_coordinates(amount)
+	for i in range(amount):
+		values = [[i,canvas_height],[i,0]]
+		for j in range(amount):
+			if i == j:
+				continue
+			distance = math.sqrt((points[2*i]-points[2*j])**2+(points[2*i+1]-points[2*j+1])**2)
+			if distance < values[0][1]:
+				values[1] = values[0]
+				values[0] = [j,distance]
+#			if distance > values[1][1]:
+#				values[1] = [j,distance]
+		draw_polygon([points[2*i],points[2*i+1],points[2*values[0][0]],points[2*values[0][0]+1],points[2*values[1][0]],points[2*values[1][0]+1]],get_color(),"filled")
+		draw_line([points[2*i],points[2*i+1],points[2*values[0][0]],points[2*values[0][0]+1]], "#ffffff", 3)
+		draw_line([points[2*i],points[2*i+1],points[2*values[1][0]],points[2*values[1][0]+1]], "#ffffff", 3)
+	for i in range(amount):
+		draw_ellipse([points[2*i]-6,points[2*i+1]-6,points[2*i]+6,points[2*i+1]+6], "#000000", "filled")
+
 
 background = '#777780' #program background color
 bwidth = 14 #button width
@@ -1149,6 +1169,7 @@ b_gradient_image = tk.Button(f_buttons_top, state='normal', command=lambda:draw_
 b_double_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_double_color(''), text='double color', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=11,column=1)
 b_fight = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fight(''), text='fight', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=12,column=0)
 b_five = tk.Button(f_buttons_top, state='normal', command=lambda:draw_five(''), text='five', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=12,column=1)
+b_net = tk.Button(f_buttons_top, state='normal', command=lambda:draw_net(''), text='net', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=13,column=0)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
