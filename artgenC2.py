@@ -17,7 +17,7 @@ def get_window_info(window): #get size and position of given window
 	array = window.geometry().split("+")
 	info = array[0].split("x")+array[1:3]
 	print(info)
-		return info
+	return info
 
 #gui
 root = tkinter.Tk()

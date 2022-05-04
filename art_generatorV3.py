@@ -435,7 +435,7 @@ def draw_pixels(event):
             else:
                 draw_rectangle(coordinates, colors[rn.randint(0,len(colors)-1)], 'filled')
 
-def draw_symmetry(event):
+def draw_symmetry(_input_):
     amount = rn.randint(3,9)
     coordinates = get_coordinates(amount)
 ##    for i in range(amount): #put all x coordinates to the left side of canvas
@@ -447,7 +447,7 @@ def draw_symmetry(event):
         dist = -(coordinates[2*i]-canvas_width*0.5)
         mirrored_coordinates.append(canvas_width*0.5+dist) #mirror x coordinate
         mirrored_coordinates.append(coordinates[2*i+1])
-    color = get_color()
+    color = get_color() if not is_color(_input_) else _input_
     if rn.randint(0,0) == 0:
         mode = 'filled'
     else:
@@ -1070,26 +1070,46 @@ def draw_five(event):
 		draw_polygon("","","filled")
 
 def draw_net(event):
-	draw_color(get_color())
-	amount = rn.randint(4,10)
+	bg = get_color()
+	draw_color(bg) #background
+	amount = rn.randint(4,10) #how many points to draw shape from
 	points = get_coordinates(amount)
+	colors = []
 	for i in range(amount):
-		values = [[i,canvas_height],[i,0]]
+		color = get_color()
+		while color == bg:
+			color = get_color()
+		colors.append(color)
+	for i in range(amount): #iterate through all points
+		values = [[i,canvas_height+canvas_width],[i,canvas_height+canvas_width]] #initalise array for two lowest distances with very high values
 		for j in range(amount):
-			if i == j:
+			if i == j: #dont check distance from point to itself
 				continue
 			distance = math.sqrt((points[2*i]-points[2*j])**2+(points[2*i+1]-points[2*j+1])**2)
 			if distance < values[0][1]:
-				values[1] = values[0]
 				values[0] = [j,distance]
-#			if distance > values[1][1]:
-#				values[1] = [j,distance]
-		draw_polygon([points[2*i],points[2*i+1],points[2*values[0][0]],points[2*values[0][0]+1],points[2*values[1][0]],points[2*values[1][0]+1]],get_color(),"filled")
-		draw_line([points[2*i],points[2*i+1],points[2*values[0][0]],points[2*values[0][0]+1]], "#ffffff", 3)
-		draw_line([points[2*i],points[2*i+1],points[2*values[1][0]],points[2*values[1][0]+1]], "#ffffff", 3)
-	for i in range(amount):
-		draw_ellipse([points[2*i]-6,points[2*i+1]-6,points[2*i]+6,points[2*i+1]+6], "#000000", "filled")
+		for j in range(amount):
+			if i != j: #dont check distance from point to itself
+				distance = math.sqrt((points[2*i]-points[2*j])**2+(points[2*i+1]-points[2*j+1])**2)
+				if distance != values[0][1] and distance < values[1][1]:
+					values[1] = [j,distance]
+#		draw_polygon([points[2*i],points[2*i+1],points[2*values[0][0]],points[2*values[0][0]+1],points[2*values[1][0]],points[2*values[1][0]+1]],colors[i],"filled")
+#		draw_line([points[2*i],points[2*i+1],points[2*values[0][0]],points[2*values[0][0]+1]], "#ffffff", 3) #draw lines to two nearest neighbours
+#		draw_line([points[2*i],points[2*i+1],points[2*values[1][0]],points[2*values[1][0]+1]], "#ffffff", 3)
+#	for i in range(amount): #draw circle on each point
+#		draw_ellipse([points[2*i]-6,points[2*i+1]-6,points[2*i]+6,points[2*i+1]+6], "#000000", "filled")
+		a,b = i,i
+		while a == i:
+			a = rn.randint(0,int(len(points)/2)-1)
+		while b == i:
+			b = rn.randint(0,int(len(points)/2)-1)
+		draw_polygon([points[2*i],points[2*i+1],points[2*a],points[2*a+1],points[2*b],points[2*b+1]],colors[i],"filled")
 
+def draw_mirror(event):
+	draw_color(get_color())
+	amount = rn.randint(2,7)
+	for i in range(amount):
+		draw_symmetry("")
 
 background = '#777780' #program background color
 bwidth = 14 #button width
@@ -1170,6 +1190,7 @@ b_double_color = tk.Button(f_buttons_top, state='normal', command=lambda:draw_do
 b_fight = tk.Button(f_buttons_top, state='normal', command=lambda:draw_fight(''), text='fight', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=12,column=0)
 b_five = tk.Button(f_buttons_top, state='normal', command=lambda:draw_five(''), text='five', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=12,column=1)
 b_net = tk.Button(f_buttons_top, state='normal', command=lambda:draw_net(''), text='net', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=13,column=0)
+b_mirror = tk.Button(f_buttons_top, state='normal', command=lambda:draw_mirror(''), text='mirror', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=13,column=1)
 
 b_comic = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_comic(''), text='comic', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=0)
 b_polygon = tk.Button(f_buttons_midtop, state='normal', command=lambda:draw_polygon('', '', ''), text='polygon', width=bwidth, bg=bcolor, fg=bfontcolor, font=bfont, bd=bborder, relief=brelief).grid(row=0,column=1)
@@ -1246,7 +1267,7 @@ s_red.grid(row=2,columnspan=5)
 s_green.grid(row=3,columnspan=5)
 s_blue.grid(row=4,columnspan=5)
 
-def colorbuttons(button_number):
+def colorbuttons(button_number): #when pressing a color button, fill it with the color set with the sliders
 	if button_number == 1:
 		b_color1['bg'] = l_color['bg']
 	elif button_number == 2:
@@ -1272,6 +1293,47 @@ b_color5.grid(row=0,column=4)
 custom_mode = tk.IntVar() #color mode
 c_custom = tk.Checkbutton(f_colorselection, text='custom colors', variable=custom_mode, font=bfont, bg=bcolor, fg='white', borderwidth=0)
 c_custom.grid(row=5,columnspan=5)
+
+import hsl_colors
+def mono():
+	colors = hsl_colors.get_monochromatic(rn.randint(0,360),rn.randint(0,100),rn.randint(0,100))
+	b_color1["bg"] = colors[0]
+	b_color2["bg"] = colors[1]
+	b_color3["bg"] = colors[2]
+	b_color4["bg"] = "#000000"
+	b_color5["bg"] = "#ffffff"
+b_mono = tk.Button(f_left,command=mono,text="hsl monochromatic",relief=brelief,bg=bcolor,fg="white",bd=bborder)
+b_mono.pack()
+
+def analog():
+	colors = hsl_colors.get_analogous(rn.randint(0,360),rn.randint(0,100),rn.randint(0,100))
+	b_color1["bg"] = colors[0]
+	b_color2["bg"] = colors[1]
+	b_color3["bg"] = colors[2]
+	b_color4["bg"] = "#000000"
+	b_color5["bg"] = "#ffffff"
+b_analog = tk.Button(f_left,command=analog,text="hsl analogous",relief=brelief,bg=bcolor,fg="white",bd=bborder)
+b_analog.pack()
+
+def tetradic():
+	colors = hsl_colors.get_tetradic(rn.randint(0,360),rn.randint(0,100),rn.randint(0,100))
+	b_color1["bg"] = colors[0]
+	b_color2["bg"] = colors[1]
+	b_color3["bg"] = colors[2]
+	b_color4["bg"] = colors[3]
+	b_color5["bg"] = "#ffffff"
+b_tetradic = tk.Button(f_left,command=tetradic,text="hsl tetradic",relief=brelief,bg=bcolor,fg="white",bd=bborder)
+b_tetradic.pack()
+
+def triadic():
+	colors = hsl_colors.get_triadic(rn.randint(0,360),rn.randint(0,100),rn.randint(0,100))
+	b_color1["bg"] = colors[0]
+	b_color2["bg"] = colors[1]
+	b_color3["bg"] = colors[2]
+	b_color4["bg"] = "#000000"
+	b_color5["bg"] = "#ffffff"
+b_triadic = tk.Button(f_left,command=triadic,text="hsl triadic",relief=brelief,bg=bcolor,fg="white",bd=bborder)
+b_triadic.pack()
 
 root.bind('<Control-d>',delete_canvas)
 
