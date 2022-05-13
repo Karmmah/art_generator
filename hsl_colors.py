@@ -1,11 +1,9 @@
-import tkinter
-
 #start:FF0000-green'-red,-blue'-green,-red'-blue, (' goes up; , goes down)
 
 def get_color(h,s,l): #hue in [0,360], value in [0,100], saturation in [0,100]
-	color = hue(h)
-	color = saturation(color,s)
-	color = luminance(color,l)
+	color = calc_hue(h)
+	color = calc_saturation(color,s)
+	color = calc_luminance(color,l)
 	return color
 
 def get_monochromatic(hue,saturation,luminance):
@@ -48,7 +46,7 @@ def get_triadic(hue,saturation,luminance): #hue = 0 => red
 	color3 = get_color(hue3,saturation,luminance)
 	return [color1,color2,color3]
 
-def luminance(color,luminance):
+def calc_luminance(color,luminance):
 	red,green,blue = color[1:3],color[3:5],color[5:7]
 	array = [int(red,16),int(green,16),int(blue,16)]
 	for i in range(len(array)):
@@ -60,7 +58,7 @@ def luminance(color,luminance):
 		array[i] = color
 	return "#"+array[0]+array[1]+array[2]
 
-def saturation(color,saturation):
+def calc_saturation(color,saturation):
 	red,green,blue = color[1:3],color[3:5],color[5:7]
 	array = [int(red,16),int(green,16),int(blue,16)]
 	for i in range(len(array)):
@@ -71,7 +69,7 @@ def saturation(color,saturation):
 		array[i] = color
 	return "#"+array[0]+array[1]+array[2]
 
-def hue(angle):
+def calc_hue(angle):
 	if angle > 300 or angle <= 60:
 		red = 'ff'
 	elif angle > 60 and angle <= 120:
@@ -123,6 +121,8 @@ def draw_colorcircle(radius,width,offset,saturation,luminance):
 #			canvas.create_arc(border,border,cwidth-border,cheight-border, start=i, extent=1, fill='', outline=color, style='arc', width=width)
 		except:
 			print(angle,'canvas error')
+
+import tkinter
 
 def main2():
 #	canvas.delete('all')
