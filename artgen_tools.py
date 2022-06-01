@@ -22,11 +22,11 @@ def get_gradient(color1,color2,steps):
         gradient.append('#'+str(red_new)+str(green_new)+str(blue_new))
     return gradient
 
-def artwork_number(mode="normal"):
-####implement counting one up when test mode is not active
-	with open("artwork_number.txt") as _file_:
+def artwork_number(mode): #mode is "normal" or "test"
+	with open("artwork_number.txt","r") as _file_:
 		number = int(_file_.read())+1
-		if mode == "test":
+	if mode == "normal":
+		with open("artwork_number.txt","w") as _file_:
 			_file_.write(str(number+1))
 	return number
 

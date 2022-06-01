@@ -1,5 +1,5 @@
 #parameters
-cwidth, cheight = 300, 300 #width and height of canvas
+cwidth, cheight = 400, 400 #width and height of canvas
 output_width, output_height = 1080, 1080 #dimensions of output svg file
 xborder, yborder = 10, 10 #distance from canvas edge to keep free from shapes
 frame_padding = 7 #distance between selector frames
@@ -20,7 +20,7 @@ def draw_image(): #main method for drawing a whole random image by drawing a bac
 
 def add_single(event=""): #main method for adding one shape to the canvas
 	global canvas,svg
-	number = random.randint(1,10)
+	number = random.randint(1,30)
 	if check_selection() == True: #check if at least one shape and one background are selected
 		while number>=0:
 			if line_var.get() == True:
@@ -36,6 +36,21 @@ def add_single(event=""): #main method for adding one shape to the canvas
 			if polygon_var.get() == True:
 				if number<=0:
 					canvas,string = artgen_drawing.draw_polygon(canvas)
+					break
+				number -= 1
+			if net_var.get() == True:
+				if number<=0:
+					canvas,string = artgen_drawing.draw_net(canvas)
+					break
+				number -= 1
+			if symmetry_var.get() == True:
+				if number<=0:
+					canvas,string = artgen_drawing.draw_symmetry(canvas)
+					break
+				number -= 1
+			if circular_var.get() == True:
+				if number<=0:
+					canvas,string = artgen_drawing.draw_circular_pattern(canvas)
 					break
 				number -= 1
 		svg += string
@@ -72,7 +87,9 @@ def reset_basic(): #reset checkmarks in basic shape section
 	polygon_var.set(False)
 
 def reset_complex():
-	pass
+	global net_var,symmetry_var
+	net_var.set(False)
+	symmetry_var.set(False)
 
 def reset_graphics():
 	pass
@@ -80,19 +97,22 @@ def reset_graphics():
 def reset_backgrounds():
 	pass
 
-def check_selection(): #check if at least one shape in each section is selected
+def check_selection(): #check if at least one shape and one background is selected
 	result_shapes = line_var.get()+rectangle_var.get()+polygon_var.get()
 	result_background = color_var.get()
-	if result_shapes>0 and result_background>0:
+	result_complex = circular_var.get()+net_var.get()+symmetry_var.get()
+	if result_background>0 and (result_shapes>0 or result_complex>0):
 		return True
 	else:
 		print("Select at least one shape and one background")
 		return False
 
 def save(event=""):
-	name = "kunstwerk"+str(artgen_tools.artwork_number())+".svg"
+	global mode_var
+	number = artgen_tools.artwork_number(mode_var.get())
+	name = "kunstwerk"+str(number)+".svg"
 	with open(name,"w") as file:
-		file.write(collect_svg())
+		file.write(collect_svg(number))
 
 def delete_canvas(event=""):
 	canvas.delete("all")
@@ -106,15 +126,13 @@ def delete_canvas(event=""):
 #		print(canvas.coords(item))
 #	return objects
 
-def collect_svg(): #format the saved svg information of all objects on canvas into proper svg file
+def collect_svg(number): #format the saved svg information of all objects on canvas into proper svg file
 	global svg
-	number = artgen_tools.artwork_number()
 	docinfo = '<svg width="'+str(output_width)+'px" height="'+str(output_height)+'px" docname="kunstwerk'+str(number)+'.svg">'
 	return docinfo+svg+'\n</svg>'
 
 def main():
 	import tkinter
-
 	root = tkinter.Tk()
 
 	f_creator = tkinter.Frame(root,bg="blue")
@@ -129,11 +147,15 @@ def main():
 #	l_seed = tkinter.Label(f_creator, text="Input Seed")
 #	e_seed = tkinter.Entry(f_creator, state="disabled")
 
-	global rectangle_var,line_var,color_var,polygon_var
+	#all variables for the checkbuttons
+	global circular_var,symmetry_var,rectangle_var,line_var,color_var,polygon_var,net_var,mode_var
 
 	b_background = tkinter.Button(f_creator, text="Background %i"%(background_number), command=draw_background)
 	b_single = tkinter.Button(f_creator, text="Add One %i"%(single_number), command=add_single)
 	b_multiple = tkinter.Button(f_creator, state="normal", text="Add Multiple %i"%(multiple_number), command=add_multiple)
+	mode_var = tkinter.StringVar() #variable for changing the save mode to test (artwork number won't be increased on save)
+	mode_var.set("normal")
+	c_mode = tkinter.Checkbutton(f_creator, text="Test Export", variable=mode_var, onvalue="test", offvalue="normal")
 
 	#backgrounds
 	f_backgrounds = tkinter.Frame(f_selector, bg="yellow", width=40, height=40)
@@ -153,12 +175,21 @@ def main():
 	c_rectangle = tkinter.Checkbutton(f_basic_shapes, text="Rectangle", variable=rectangle_var)
 	c_polygon = tkinter.Checkbutton(f_basic_shapes, text="Polygon", variable=polygon_var)
 
+	#complex shapes
 	f_complex_shapes = tkinter.Frame(f_selector, bg="skyblue", width=40, height=40)
-	pass
+	b_reset_complex = tkinter.Button(f_complex_shapes, text="reset", command=reset_complex)
+	net_var = tkinter.BooleanVar()
+	symmetry_var = tkinter.BooleanVar()
+	circular_var = tkinter.BooleanVar()
+	c_net = tkinter.Checkbutton(f_complex_shapes, text="Net", variable=net_var)
+	c_symmetry = tkinter.Checkbutton(f_complex_shapes, text="Symmetry", variable=symmetry_var)
+	c_circular = tkinter.Checkbutton(f_complex_shapes, text="Circular Patter", variable=circular_var)
 
+	#graphics
 	f_graphics = tkinter.Frame(f_selector, bg="orange", width=40, height=40)
 	pass
 
+	#colorpalette
 	f_colorpalette = tkinter.Frame(f_selector, bg="grey", width=40, height=40)
 	pass
 
@@ -182,6 +213,7 @@ def main():
 	b_multiple.grid(row=1,column=2)
 	b_save.grid(row=3, column=0)
 	b_delete.grid(row=3, column=1)
+	c_mode.grid(row=4,column=1)
 	#inside f_backgrounds:
 	b_reset_backgrounds.grid(row=0)
 	c_color.grid(row=1,column=0)
@@ -191,7 +223,10 @@ def main():
 	c_rectangle.pack(anchor="nw")
 	c_polygon.pack(anchor="nw")
 	#inside f_complex_shapes:
-	pass
+	b_reset_complex.pack()
+	c_net.pack(anchor="nw")
+	c_symmetry.pack(anchor="nw")
+	c_circular.pack(anchor="nw")
 	#inside f_graphics:
 	pass
 
