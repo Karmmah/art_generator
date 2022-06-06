@@ -27,7 +27,7 @@ def artwork_number(mode): #mode is "normal" or "test"
 		number = int(_file_.read())+1
 	if mode == "normal":
 		with open("artwork_number.txt","w") as _file_:
-			_file_.write(str(number+1))
+			_file_.write(str(number))
 	return number
 
 def scale_to_output(coords): #scale coordinates from canvas to output svg file dimensions

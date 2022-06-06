@@ -6,12 +6,13 @@ frame_padding = 7 #distance between selector frames
 default_background_color = "#fafafa"
 default_background = '\n	<rect x="0" y="0" width="'+str(output_width)+'" height="'+str(output_height)+'" fill="'+default_background_color+'" stroke=""/>'
 
-#button numbering
+#############################
+#button numbering/assignment:
 background_number = 1
 single_number = 2
 multiple_number = 3
-delete_number = 9
-save_number = 0
+delete_number = 0
+save_number = 9
 
 import random, artgen_tools, artgen_drawing #imported after parameter declaration because modules need these parameters
 
@@ -169,11 +170,11 @@ def main():
 	b_reset_basic = tkinter.Button(f_basic_shapes, text="reset", command=reset_basic)
 	line_var = tkinter.BooleanVar()
 	rectangle_var = tkinter.BooleanVar()
-	rectangle_var.set(1)
 	polygon_var = tkinter.BooleanVar()
 	c_line = tkinter.Checkbutton(f_basic_shapes, text="Line", variable=line_var)
 	c_rectangle = tkinter.Checkbutton(f_basic_shapes, text="Rectangle", variable=rectangle_var)
 	c_polygon = tkinter.Checkbutton(f_basic_shapes, text="Polygon", variable=polygon_var)
+	polygon_var.set(1)
 
 	#complex shapes
 	f_complex_shapes = tkinter.Frame(f_selector, bg="skyblue", width=40, height=40)
@@ -193,7 +194,7 @@ def main():
 	f_colorpalette = tkinter.Frame(f_selector, bg="grey", width=40, height=40)
 	pass
 
-	b_save = tkinter.Button(f_creator, text="save %i"%(save_number), command=save, bg="gold")
+	b_save = tkinter.Button(f_creator, text="save", command=save, bg="gold")
 	b_delete = tkinter.Button(f_creator, text="delete %i"%(delete_number), command=delete_canvas, bg="#ff4040")
 
 	#alignment and grids

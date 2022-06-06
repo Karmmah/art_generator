@@ -80,6 +80,47 @@ def draw_polygon(canvas, coords=[], fill="", outline="", width=0):
 	if width == 0:
 		width = random.randint(width_min,width_max)
 	canvas.create_polygon(coords, fill=fill, outline=outline, width=width, joinstyle='miter')
+	xavg, yavg = 0, 0 #calculate center of coordinates
+	amount = int(len(coords)/2) #number of points
+	for i in range(amount):
+		xavg += coords[2*i]
+		yavg += coords[2*i+1]
+	xavg, yavg = xavg/amount, yavg/amount
+#	canvas.create_oval(xavg-3,yavg-3,xavg+3,yavg+3, fill="black")
+	sorted_coords = []
+	for i in range(amount):
+		if coords[2*i]-xavg != 0:
+			angle = math.atan((yavg-coords[2*i+1])/(coords[2*i]-xavg)) #calculate angle of point to avg relative to horizontal
+		else:
+			if yavg-coords[2*i+1] > 0:
+				angle = math.pi/2
+			else:
+				angle = -math.pi/2
+		angle = -angle
+		if coords[2*i]-xavg < 1:
+			angle += math.pi
+		sorted_coords += [[angle,coords[2*i],coords[2*i+1]]]
+	sorted_coords.sort()
+	coords = []
+	for i in range(amount):
+		coords += sorted_coords[i][1:3]
+#		canvas.create_text(sorted_coords[i][1:3], text=str(i), font="Arial 24", fill="#ff0000")
+	coords = artgen_tools.scale_to_output(coords) #scale the coordinates for proper size in output svg file
+	string = '\n<polygon points="' #svg output
+	for i in range(len(coords)): #add coordinates to svg output
+		string = string + str(coords[i])+' '
+	string = string + '" fill="'+fill+'" stroke="'+outline+'" stroke-width="'+str(width)+'" stroke-linecap="butt" stroke-linejoin="miter stroke-miterlimit:12"/>'
+	return canvas, string
+
+def draw_polygon_old(canvas, coords=[], fill="", outline="", width=0):
+	amount = random.randint(3,6) #maybe adjust number with slider?
+	if coords == []:
+		coords = artgen_tools.get_coordinates(amount)
+	if fill == "" and outline == "":
+		fill = artgen_tools.get_color()
+	if width == 0:
+		width = random.randint(width_min,width_max)
+	canvas.create_polygon(coords, fill=fill, outline=outline, width=width, joinstyle='miter')
 	coords = artgen_tools.scale_to_output(coords) #scale the coordinates for proper size in output svg file
 	string = '\n<polygon points="' #svg output
 	for i in range(len(coords)): #add coordinates to svg output
