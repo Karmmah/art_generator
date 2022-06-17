@@ -1,4 +1,4 @@
-import random, artgen, artgen_tools, math
+import random, artgen, artgen_tools, math, hsl_colors
 
 cwidth, cheight = artgen.cwidth, artgen.cheight
 output_width, output_height = artgen.output_width, artgen.output_height
@@ -9,6 +9,65 @@ width_min, width_max = 2, cwidth/10 #for outlines and lines
 
 ######complex shapes
 ####################
+def draw_perspective(canvas):
+	amount = random.randint(3,7)
+	max_radius = random.randint(int(cwidth/10),int(cwidth/4))
+	centers = artgen_tools.get_coordinates(2)
+	perspective_factor = random.randint(60,140)/100
+	coords1, coords2 = [], []
+	for i in range(amount):
+		angle = 2*math.pi*i/amount
+		radius = max_radius*random.randint(20,100)/100
+		x = centers[0]+math.cos(angle)*radius
+		y = centers[1]+math.sin(angle)*radius
+		coords1 += [x,y]
+		radius = radius*perspective_factor
+		x = centers[2]+math.cos(angle)*radius
+		y = centers[3]+math.sin(angle)*radius
+		coords2 += [x,y]
+	color = artgen_tools.get_color()
+	width = random.randint(2,int(cwidth/60))
+	output = ""
+	canvas, string = draw_polygon(canvas, coords=coords1, outline=color, width=width)
+	output += string
+	for i in range(amount):
+		coords = [coords1[2*i],coords1[2*i+1],coords2[2*i],coords2[2*i+1]]
+		canvas, string = draw_line(canvas,coords=coords,color=color,width=width)
+		output += string
+	canvas, string = draw_polygon(canvas, coords=coords2, outline=color, width=width)
+	output += string
+	return canvas, output
+
+def draw_flow(canvas):
+	amount = random.randint(5,36)
+	gradient = hsl_colors.get_gradient(artgen_tools.get_color(),artgen_tools.get_color(),amount)
+	output = ""
+	line_coords = artgen_tools.get_coordinates(2)
+	radius1, radius2 = random.randint(2,int(cwidth/4)), random.randint(4,int(cwidth/4))
+	shape_number = random.randint(0,1)
+	for i in range(amount):
+		radius = radius1+(radius2-radius1)*i/amount
+		x = line_coords[0]+(line_coords[2]-line_coords[0])*i/amount
+		y = line_coords[1]+(line_coords[3]-line_coords[1])*i/amount
+		coords = [x,y]
+		if shape_number == 0:
+			canvas, string = draw_circle(canvas, coords=coords, fill=gradient[i], radius=radius)
+		elif shape_number == 1:
+			coords = [coords[0]-radius,coords[1]-radius,coords[0]+radius,coords[1]+radius]
+			canvas, string = draw_rectangle(canvas, coords=coords, fill=gradient[i])
+		output += string
+	return canvas, output
+
+def draw_spray(canvas):
+	amount = random.randint(5,36)
+	gradient = hsl_colors.get_gradient(artgen_tools.get_color(),artgen_tools.get_color(),amount)
+	output = ""
+	for i in range(amount):
+		radius = 10+i*4
+		canvas, string = draw_circle(canvas, fill=gradient[i], radius=radius)
+		output += string
+	return canvas, output
+
 def draw_circular_pattern(canvas):
 	symmetry = random.randint(3,7) #number of symmetry axes
 	amount = random.randint(3,6) #number of points in polygon
@@ -71,6 +130,26 @@ def draw_net(canvas):
 
 ######basic shapes
 ##################
+def draw_circle(canvas, coords=[], radius=0, fill="", outline="", width=0):
+	if coords == [] or len(coords) != 2:
+		coords = artgen_tools.get_coordinates(1)
+	if radius == 0:
+		if cwidth < cheight:
+			radius = random(4,cwidth/2)
+		else:
+			radius = random.randint(4,cheight/2)
+	if fill == "" and outline == "":
+		fill = artgen_tools.get_color()
+	if width == 0:
+		width = random.randint(width_min,width_max)
+	coords = [coords[0]-radius,coords[1]-radius,coords[0]+radius,coords[1]+radius]
+	canvas.create_oval(coords, fill=fill, outline=outline, width=width)
+	coords = artgen_tools.scale_to_output(coords)
+	cx, cy = (coords[0]+coords[2])/2, (coords[1]+coords[3])/2
+	rx, ry = abs((coords[0]-coords[2])/2), abs((coords[1]-coords[3])/2)
+	string = '\n<ellipse cx="%f" cy="%f" rx="%f" ry="%f" fill="%s" stroke="%s" stroke-width="%f"/>'%(cx,cy,rx,ry,fill,outline,width)
+	return canvas, string
+
 def draw_polygon(canvas, coords=[], fill="", outline="", width=0):
 	amount = random.randint(3,6) #maybe adjust number with slider?
 	if coords == []:
@@ -79,8 +158,8 @@ def draw_polygon(canvas, coords=[], fill="", outline="", width=0):
 		fill = artgen_tools.get_color()
 	if width == 0:
 		width = random.randint(width_min,width_max)
-	canvas.create_polygon(coords, fill=fill, outline=outline, width=width, joinstyle='miter')
-	xavg, yavg = 0, 0 #calculate center of coordinates
+#	canvas.create_polygon(coords, fill=fill, outline=outline, width=width, joinstyle='miter')
+	xavg, yavg = 0, 0 #calculate center of coordinates for ordering the coordinates around it
 	amount = int(len(coords)/2) #number of points
 	for i in range(amount):
 		xavg += coords[2*i]
@@ -105,28 +184,30 @@ def draw_polygon(canvas, coords=[], fill="", outline="", width=0):
 	for i in range(amount):
 		coords += sorted_coords[i][1:3]
 #		canvas.create_text(sorted_coords[i][1:3], text=str(i), font="Arial 24", fill="#ff0000")
+	canvas.create_polygon(coords, fill=fill, outline=outline, width=width, joinstyle='miter')
 	coords = artgen_tools.scale_to_output(coords) #scale the coordinates for proper size in output svg file
-	string = '\n<polygon points="' #svg output
+	string = '\n	<polygon points="' #svg output
 	for i in range(len(coords)): #add coordinates to svg output
 		string = string + str(coords[i])+' '
+	fill = "none" if fill=="" else fill
 	string = string + '" fill="'+fill+'" stroke="'+outline+'" stroke-width="'+str(width)+'" stroke-linecap="butt" stroke-linejoin="miter stroke-miterlimit:12"/>'
 	return canvas, string
 
-def draw_polygon_old(canvas, coords=[], fill="", outline="", width=0):
-	amount = random.randint(3,6) #maybe adjust number with slider?
-	if coords == []:
-		coords = artgen_tools.get_coordinates(amount)
-	if fill == "" and outline == "":
-		fill = artgen_tools.get_color()
-	if width == 0:
-		width = random.randint(width_min,width_max)
-	canvas.create_polygon(coords, fill=fill, outline=outline, width=width, joinstyle='miter')
-	coords = artgen_tools.scale_to_output(coords) #scale the coordinates for proper size in output svg file
-	string = '\n<polygon points="' #svg output
-	for i in range(len(coords)): #add coordinates to svg output
-		string = string + str(coords[i])+' '
-	string = string + '" fill="'+fill+'" stroke="'+outline+'" stroke-width="'+str(width)+'" stroke-linecap="butt" stroke-linejoin="miter stroke-miterlimit:12"/>'
-	return canvas, string
+#def draw_polygon_basic(canvas, coords=[], fill="", outline="", width=0):
+#	amount = random.randint(3,6) #maybe adjust number with slider?
+#	if coords == []:
+#		coords = artgen_tools.get_coordinates(amount)
+#	if fill == "" and outline == "":
+#		fill = artgen_tools.get_color()
+#	if width == 0:
+#		width = random.randint(width_min,width_max)
+#	canvas.create_polygon(coords, fill=fill, outline=outline, width=width, joinstyle='miter')
+#	coords = artgen_tools.scale_to_output(coords) #scale the coordinates for proper size in output svg file
+#	string = '\n	<polygon points="' #svg output
+#	for i in range(len(coords)): #add coordinates to svg output
+#		string = string + str(coords[i])+' '
+#	string = string + '" fill="'+fill+'" stroke="'+outline+'" stroke-width="'+str(width)+'" stroke-linecap="butt" stroke-linejoin="miter stroke-miterlimit:12"/>'
+#	return canvas, string
 
 def draw_rectangle(canvas,coords=[],fill="",outline="",width=0):
 	if coords == []:

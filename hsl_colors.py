@@ -1,5 +1,22 @@
 #start:FF0000-green'-red,-blue'-green,-red'-blue, (' goes up; , goes down)
 
+def get_gradient(color1,color2,steps):
+	red1, green1, blue1 = int(color1[1:3],16), int(color1[3:5],16), int(color1[5:7],16)
+	red2, green2, blue2 = int(color2[1:3],16), int(color2[3:5],16), int(color2[5:7],16)
+	gradient = []
+	for i in range(steps):
+		red_new = hex(int(round(red1+(red2-red1)*i/steps,0))).lstrip('-0x')
+		green_new = hex(int(round(green1+(green2-green1)*i/steps,0))).lstrip('-0x')
+		blue_new = hex(int(round(blue1+(blue2-blue1)*i/steps,0))).lstrip('-0x')
+		while len(red_new) < 2:
+			red_new = '0'+red_new
+		while len(green_new) < 2:
+			green_new = '0'+green_new
+		while len(blue_new) < 2:
+			blue_new = '0'+blue_new
+		gradient.append('#'+str(red_new)+str(green_new)+str(blue_new))
+	return gradient
+
 def get_color(h,s,l): #hue in [0,360], value in [0,100], saturation in [0,100]
 	color = calc_hue(h)
 	color = calc_saturation(color,s)
@@ -124,7 +141,7 @@ def draw_colorcircle(radius,width,offset,saturation,luminance):
 
 import tkinter
 
-def main2():
+def main2(): #draw static color circle fading to grey towards the middle
 #	canvas.delete('all')
 	global root,canvas,cwidth,cheight
 	cwidth = 600
@@ -134,7 +151,7 @@ def main2():
 	canvas.pack()
 	border = 10 #pixels from canvas edge
 
-	amount = 20
+	amount = 40
 	width = (cwidth-2*border)/2/amount
 	for i in range(amount):
 		radius = (width/2+(amount-1)*width)-i*width
@@ -142,7 +159,7 @@ def main2():
 
 	root.mainloop()
 
-def main():
+def main(): #draw rotating color circle with additional color tiles
 	global root,canvas,cwidth,cheight
 	cwidth = 600
 	cheight = cwidth

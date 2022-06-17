@@ -1,6 +1,9 @@
 #parameters
-cwidth, cheight = 400, 400 #width and height of canvas
-output_width, output_height = 1080, 1080 #dimensions of output svg file
+vertical_resolution = 1080
+aspect_ratio = 1/1#3/2
+cwidth = 450 #width and height of canvas
+cheight = cwidth/aspect_ratio
+output_width, output_height = vertical_resolution/aspect_ratio, vertical_resolution #dimensions of output svg file
 xborder, yborder = 10, 10 #distance from canvas edge to keep free from shapes
 frame_padding = 7 #distance between selector frames
 default_background_color = "#fafafa"
@@ -11,18 +14,21 @@ default_background = '\n	<rect x="0" y="0" width="'+str(output_width)+'" height=
 background_number = 1
 single_number = 2
 multiple_number = 3
-delete_number = 0
+image_number = 4
 save_number = 9
+delete_number = 0
 
 import random, artgen_tools, artgen_drawing #imported after parameter declaration because modules need these parameters
 
-def draw_image(): #main method for drawing a whole random image by drawing a background and multiple shapes or some graphics
-	pass
+def draw_image(event=""): #main method for drawing a whole random image by drawing a background and multiple shapes or some graphics
+	global canvas, svg
+	draw_background()
+	add_multiple()
 
 def add_single(event=""): #main method for adding one shape to the canvas
 	global canvas,svg
-	number = random.randint(1,30)
 	if check_selection() == True: #check if at least one shape and one background are selected
+		number = random.randint(1,20)
 		while number>=0:
 			if line_var.get() == True:
 				if number<=0:
@@ -54,13 +60,23 @@ def add_single(event=""): #main method for adding one shape to the canvas
 					canvas,string = artgen_drawing.draw_circular_pattern(canvas)
 					break
 				number -= 1
+			if spray_var.get() == True:
+				if number<=0:
+					canvas,string = artgen_drawing.draw_spray(canvas)
+					break
+				number -= 1
+			if flow_var.get() == True:
+				if number<=0:
+					canvas,string = artgen_drawing.draw_perspective(canvas)#flow(canvas)
+					break
+				number -= 1
 		svg += string
 
 def add_multiple(event=""): #main method for adding multiple shapes to canvas by calling the single method multiple times
+	#a slider is needed to roughly specify how many shapes to add
 	amount = random.randint(2,6)
 	for i in range(amount):
 		add_single()
-	pass #a slider is needed to roughly specify how many shapes to add
 
 def draw_background(event=""): #main method for drawing a background
 	global canvas,svg
@@ -99,9 +115,9 @@ def reset_backgrounds():
 	pass
 
 def check_selection(): #check if at least one shape and one background is selected
-	result_shapes = line_var.get()+rectangle_var.get()+polygon_var.get()
+	result_shapes = line_var.get()+ rectangle_var.get()+ polygon_var.get()
 	result_background = color_var.get()
-	result_complex = circular_var.get()+net_var.get()+symmetry_var.get()
+	result_complex = flow_var.get()+ spray_var.get()+ circular_var.get()+ net_var.get()+ symmetry_var.get()
 	if result_background>0 and (result_shapes>0 or result_complex>0):
 		return True
 	else:
@@ -121,7 +137,7 @@ def delete_canvas(event=""):
 	global svg
 	svg = default_background
 
-#def get_canvas_objects(): #interesting method used for nothing
+#def get_canvas_objects(): #interesting method used for nothing at the moment
 #	objects = canvas.find_all()
 #	for item in objects:
 #		print(canvas.coords(item))
@@ -137,7 +153,7 @@ def main():
 	root = tkinter.Tk()
 
 	f_creator = tkinter.Frame(root,bg="blue")
-	f_selector = tkinter.Frame(root,bg="red",width=100,height=100)
+	f_selector = tkinter.Frame(root,bg="red",width=800,height=100)
 
 	global canvas, svg
 	svg = default_background #variable for saving info for each created shape on canvas for svg export
@@ -145,15 +161,16 @@ def main():
 	canvas = tkinter.Canvas(f_creator, width=cwidth, height=cheight)
 	canvas.create_rectangle(0,0,cwidth,cheight, fill=default_background_color, outline="")
 
-#	l_seed = tkinter.Label(f_creator, text="Input Seed")
+#	l_seed = tkinter.Label(f_creator, text="Input Seed") #idea was to use seeds to create artworks
 #	e_seed = tkinter.Entry(f_creator, state="disabled")
 
 	#all variables for the checkbuttons
-	global circular_var,symmetry_var,rectangle_var,line_var,color_var,polygon_var,net_var,mode_var
+	global flow_var, spray_var, circular_var, symmetry_var, rectangle_var, line_var, color_var, polygon_var, net_var, mode_var
 
 	b_background = tkinter.Button(f_creator, text="Background %i"%(background_number), command=draw_background)
 	b_single = tkinter.Button(f_creator, text="Add One %i"%(single_number), command=add_single)
 	b_multiple = tkinter.Button(f_creator, state="normal", text="Add Multiple %i"%(multiple_number), command=add_multiple)
+	b_image = tkinter.Button(f_creator, text="Draw Image %i"%(image_number), command=draw_image)
 	mode_var = tkinter.StringVar() #variable for changing the save mode to test (artwork number won't be increased on save)
 	mode_var.set("normal")
 	c_mode = tkinter.Checkbutton(f_creator, text="Test Export", variable=mode_var, onvalue="test", offvalue="normal")
@@ -182,9 +199,13 @@ def main():
 	net_var = tkinter.BooleanVar()
 	symmetry_var = tkinter.BooleanVar()
 	circular_var = tkinter.BooleanVar()
+	spray_var = tkinter.BooleanVar()
+	flow_var = tkinter.BooleanVar()
 	c_net = tkinter.Checkbutton(f_complex_shapes, text="Net", variable=net_var)
 	c_symmetry = tkinter.Checkbutton(f_complex_shapes, text="Symmetry", variable=symmetry_var)
-	c_circular = tkinter.Checkbutton(f_complex_shapes, text="Circular Patter", variable=circular_var)
+	c_circular = tkinter.Checkbutton(f_complex_shapes, text="Circular Pattern (unfinished)", variable=circular_var)
+	c_spray = tkinter.Checkbutton(f_complex_shapes, text="Spray", variable=spray_var)
+	c_flow = tkinter.Checkbutton(f_complex_shapes, text="Flow", variable=flow_var)
 
 	#graphics
 	f_graphics = tkinter.Frame(f_selector, bg="orange", width=40, height=40)
@@ -212,6 +233,7 @@ def main():
 	b_background.grid(row=1,column=0)
 	b_single.grid(row=1, column=1)
 	b_multiple.grid(row=1,column=2)
+	b_image.grid(row=2,column=0)
 	b_save.grid(row=3, column=0)
 	b_delete.grid(row=3, column=1)
 	c_mode.grid(row=4,column=1)
@@ -228,13 +250,16 @@ def main():
 	c_net.pack(anchor="nw")
 	c_symmetry.pack(anchor="nw")
 	c_circular.pack(anchor="nw")
+	c_spray.pack(anchor="nw")
+	c_flow.pack(anchor="nw")
 	#inside f_graphics:
 	pass
 
-	root.bind('<Key-%i>'%(background_number),draw_background)
-	root.bind('<Key-%i>'%(single_number),add_single)
-	root.bind('<Key-%i>'%(multiple_number),add_multiple)
-	root.bind('<Key-%i>'%(delete_number),delete_canvas)
+	root.bind('<Key-%i>'%(background_number), draw_background)
+	root.bind('<Key-%i>'%(single_number), add_single)
+	root.bind('<Key-%i>'%(multiple_number), add_multiple)
+	root.bind('<Key-%i>'%(image_number), draw_image)
+	root.bind('<Key-%i>'%(delete_number), delete_canvas)
 
 	root.mainloop()
 
