@@ -1,0 +1,45 @@
+##    elif pattern_nr == 1 or pattern_nr == 2: #rounded pattern
+##        for i in range(pattern_amount_y):
+##            for j in range(pattern_amount_x):
+##                if pattern_nr == 1:
+##                	tile_type = rn.randint(0,1)
+##                else:
+##                	tile_type = rn.randint(2,3)
+##                if tile_type == 0: #tile 1 (more pointy)
+##                    x1_1, y1_1 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
+##                    x2_1, y2_1 = border+pattern_width*j+pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*i+pattern_width*0.5*math.cos(math.pi*0.25)
+##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
+##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
+##                    x2_2, y2_2 = border+pattern_width*(j+1)-pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*(i+1)-pattern_width*0.5*math.cos(math.pi*0.25)
+##                    x3_2, y3_2 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
+##                elif tile_type == 1: #tile 2 (more pointy)
+##                    x1_1, y1_1 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
+##                    x2_1, y2_1 = border+pattern_width*(j+1)-pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*i+pattern_width*0.5*math.cos(math.pi*0.25)
+##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
+##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
+##                    x2_2, y2_2 = border+pattern_width*j+pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*(i+1)-pattern_width*0.5*math.cos(math.pi*0.25)
+##                    x3_2, y3_2 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
+##                elif tile_type == 2: #tile 3 (fully round)
+##                    x1_1, y1_1 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
+##                    x2_1, y2_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i+pattern_width*0.5
+##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
+##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
+##                    x2_2, y2_2 = border+pattern_width*(j+1)-pattern_width*0.5, border+pattern_width*(i+1)-pattern_width*0.5
+##                    x3_2, y3_2 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
+##                elif tile_type == 3: #tile 4 (fully round)
+##                    x1_1, y1_1 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
+##                    x2_1, y2_1 = border+pattern_width*(j+1)-pattern_width*0.5, border+pattern_width*i+pattern_width*0.5
+##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
+##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
+##                    x2_2, y2_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)-pattern_width*0.5
+##                    x3_2, y3_2 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
+##                else: #old tile
+##                    x1_1, y1_1 = border+pattern_width*(j+1), border+pattern_width*i+pattern_width*0.5
+##                    x2_1, y2_1 = border+pattern_width*j+pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*i+pattern_width*0.5*math.cos(math.pi*0.25)
+##                    x3_1, y3_1 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*i
+##                    x1_2, y1_2 = border+pattern_width*j+pattern_width*0.5, border+pattern_width*(i+1)
+##                    x2_2, y2_2 = border+pattern_width*(j+1)-pattern_width*0.5*math.sin(math.pi*0.25), border+pattern_width*(i+1)-pattern_width*0.5*math.cos(math.pi*0.25)
+##                    x3_2, y3_2 = border+pattern_width*j, border+pattern_width*i+pattern_width*0.5
+##                if pattern_nr == 1 or pattern_nr == 2:
+##                	canvas.create_line(x1_1,y1_1,x2_1,y2_1,x3_1,y3_1,fill=color,width=line_width,capstyle='round',smooth=1)
+##                	canvas.create_line(x1_2,y1_2,x2_2,y2_2,x3_2,y3_2,fill=color,width=line_width,capstyle='round',smooth=1)
