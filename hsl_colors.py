@@ -139,7 +139,6 @@ def draw_colorcircle(radius,width,offset,saturation,luminance):
 		except:
 			print(angle,'canvas error')
 
-import tkinter
 
 def main2(): #draw static color circle fading to grey towards the middle
 #	canvas.delete('all')
@@ -190,6 +189,7 @@ def main(): #draw rotating color circle with additional color tiles
 	root.mainloop()
 
 if __name__ == "__main__":
+	import tkinter
 	choice = input("1 or 2? ")
 	if choice == "1":
 		main()
